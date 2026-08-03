@@ -2,7 +2,7 @@
 const AZURE_FUNCTION_URL = "https://dulas-the-game-api-abbmayetgkebfghn.centralus-01.azurewebsites.net/api/guardarPuntaje";
 
 // Función global para guardar el puntaje desde el index.html
-window.guardarPuntaje = async function(nombre, correo, celular, puntaje) {
+window.guardarPuntaje = async function(nombre, correo, celular, sucursal, puntaje) {
     console.log("Enviando datos a Azure...");
     try {
         const respuesta = await fetch(AZURE_FUNCTION_URL, {
@@ -10,7 +10,7 @@ window.guardarPuntaje = async function(nombre, correo, celular, puntaje) {
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ nombre, correo, celular, puntaje })
+            body: JSON.stringify({ nombre, correo, celular, sucursal, puntaje })
         });
 
         if (!respuesta.ok) {
