@@ -2,8 +2,11 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Maintenance - Moota.co</title>
+    <title>Dulas The Game</title>
     <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Permanent+Marker">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
     <style type="text/css">
         body {
             background-color: black;
@@ -28,19 +31,21 @@
         h1 {
             font-family: 'Permanent Marker', cursive;
             text-align: center;
-            color: yellow;
+            color: white;
         }
-
+        #tituloJuego {
+            font-family: 'Pixelify Sans', sans-serif;
+        }
         p {
             text-decoration: none;
-            color: #0000FF;
+            color: white;
         }
     </style>
 </head>
 <body>
     <div id="shim">shim for font face</div>
-    <h1>Dulas - THE GAME</h1>
-    <p style="text-align:center;">Ayuda a Dulas a recorrer el laberinto, recoge todos los puntos y evita a los enemigos para conseguir la mayor puntuación posible.</p>
+    <h1 id="tituloJuego">DULAS - THE GAME</h1>
+    <p style="text-align:center;">Ayuda a DULAS a recorrer el laberinto, recoge todos los puntos y evita a los enemigos para conseguir la mayor puntuación posible.</p>
     <div id="pacman"></div>
 
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
@@ -72,7 +77,7 @@
                 due       = null;
             
             function getNewCoord(dir, current) { 
-                var speed  = isVunerable() ? 1 : isHidden() ? 4 : 2,
+                var speed  = isVunerable() ? 1 : isHidden() ? 4 : velocidadNormal(),
                     xSpeed = (dir === LEFT && -speed || dir === RIGHT && speed || 0),
                     ySpeed = (dir === DOWN && speed || dir === UP && -speed || 0);
             
@@ -80,6 +85,16 @@
                     "x": addBounded(current.x, xSpeed),
                     "y": addBounded(current.y, ySpeed)
                 };
+            };
+
+            function velocidadNormal() {
+                var nivelActual = (game.getLevel) ? game.getLevel() : 1;
+                if (nivelActual >= 4) {
+                    return 4;
+                } else if (nivelActual >= 2) {
+                    return 3;
+                }
+                return 2;
             };
 
             function addBounded(x1, x2) { 
@@ -369,10 +384,32 @@
             };
 
             function getNewCoord(dir, current) {   
+                var speed = velocidadPacman();
                 return {
-                    "x": current.x + (dir === LEFT && -2 || dir === RIGHT && 2 || 0),
-                    "y": current.y + (dir === DOWN && 2 || dir === UP    && -2 || 0)
+                    "x": addBounded(current.x, (dir === LEFT && -speed || dir === RIGHT && speed || 0)),
+                    "y": addBounded(current.y, (dir === DOWN && speed || dir === UP    && -speed || 0))
                 };
+            };
+
+            function addBounded(x1, x2) { 
+                var rem    = x1 % 10, 
+                    result = rem + x2;
+                if (rem !== 0 && result > 10) {
+                    return x1 + (10 - rem);
+                } else if (rem > 0 && result < 0) { 
+                    return x1 - rem;
+                }
+                return x1 + x2;
+            };
+
+            function velocidadPacman() {
+                var nivelActual = (game.getLevel) ? game.getLevel() : 1;
+                if (nivelActual >= 4) {
+                    return 4;
+                } else if (nivelActual >= 2) {
+                    return 3;
+                }
+                return 2;
             };
 
             function onWholeSquare(x) {
@@ -462,7 +499,7 @@
                     addScore((block === Pacman.BISCUIT) ? 10 : 50);
                     eaten += 1;
                     
-                    if (eaten === 182) {
+                    if (eaten === map.getTotalComestibles()) {
                         game.completedLevel();
                     }
                     
@@ -536,28 +573,30 @@
             
             initUser();
 
-            return {
+               return {
                 "draw"          : draw,
                 "drawDead"      : drawDead,
-                "loseLife"      : loseLife,
-                "getLives"      : getLives,
-                "score"         : score,
+                "move"          : move,
                 "addScore"      : addScore,
                 "theScore"      : theScore,
-                "keyDown"       : keyDown,
-                "move"          : move,
-                "newLevel"      : newLevel,
+                "loseLife"      : loseLife,
+                "getLives"      : getLives,
                 "reset"         : reset,
-                "resetPosition" : resetPosition
+                "resetPosition" : resetPosition,
+                "newLevel"      : newLevel,
+                "keyDown"       : keyDown
             };
         };
 
-        Pacman.Map = function (size) {
+       Pacman.Map = function (size) {
             var height    = null, 
                 width     = null, 
                 blockSize = size,
                 pillSize  = 0,
-                map       = null;
+                map       = null,
+                esMapaSimple = false,
+                murosActuales = Pacman.WALLS,
+                totalComestibles = 0;
             
             function withinBounds(y, x) {
                 return y >= 0 && y < height && x >= 0 && x < width;
@@ -583,10 +622,21 @@
                 ctx.strokeStyle = "#0000FF";
                 ctx.lineWidth   = 5;
                 ctx.lineCap     = "round";
-                
+
+                if (esMapaSimple) {
+                    ctx.fillStyle = "#0000FF";
+                    for (i = 0; i < height; i += 1) {
+                        for (j = 0; j < width; j += 1) {
+                            if (map[i][j] === Pacman.WALL) {
+                                ctx.fillRect(j * blockSize, i * blockSize, blockSize, blockSize);
+                            }
+                        }
+                    }
+                    return;
+                }
                 for (i = 0; i < Pacman.WALLS.length; i += 1) {
                     line = Pacman.WALLS[i];
-                    ctx.beginPath();
+                    ctx.beginPath()
 
                     for (j = 0; j < line.length; j += 1) {
                         p = line[j];
@@ -606,10 +656,35 @@
                 }
             }
             
-            function reset() {       
-                map    = Pacman.MAP.clone();
+            function reset(nivelActual) {       
+                var gridElegido = Pacman.MAP;
+                esMapaSimple = false;
+
+                if (nivelActual >= 4) {
+                    gridElegido = Pacman.MAP_NIVEL_4_5;
+                    esMapaSimple = true;
+                } else if (nivelActual >= 2) {
+                    gridElegido = Pacman.MAP_NIVEL_2_3;
+                    esMapaSimple = true;
+                }
+
+                map    = gridElegido.clone();
+                map    = gridElegido.clone();
                 height = map.length;
-                width  = map[0].length;        
+                width  = map[0].length;
+
+                totalComestibles = 0;
+                for (var i = 0; i < height; i += 1) {
+                    for (var j = 0; j < width; j += 1) {
+                        if (map[i][j] === Pacman.BISCUIT || map[i][j] === Pacman.PILL) {
+                            totalComestibles += 1;
+                        }
+                    }
+                }
+            };
+
+            function getTotalComestibles() {
+                return totalComestibles;
             };
 
             function block(pos) {
@@ -690,18 +765,19 @@
 
             reset();
             
-            return {
-                "draw"         : draw,
-                "drawBlock"    : drawBlock,
-                "drawPills"    : drawPills,
-                "block"        : block,
-                "setBlock"     : setBlock,
-                "reset"        : reset,
-                "isWallSpace"  : isWall,
-                "isFloorSpace" : isFloorSpace,
-                "height"       : height,
-                "width"        : width,
-                "blockSize"    : blockSize
+           return {
+                "draw"                : draw,
+                "drawBlock"           : drawBlock,
+                "drawPills"           : drawPills,
+                "block"               : block,
+                "setBlock"            : setBlock,
+                "reset"               : reset,
+                "isWallSpace"         : isWall,
+                "isFloorSpace"        : isFloorSpace,
+                "getTotalComestibles" : getTotalComestibles,
+                "height"              : height,
+                "width"               : width,
+                "blockSize"           : blockSize
             };
         };
 
@@ -804,6 +880,10 @@
                 return tick;
             };
 
+            function getLevel() {
+                return level;
+            };
+
             function drawScore(text, position) {
                 ctx.fillStyle = "#FFFFFF";
                 ctx.font      = "12px BDCartoonShoutRegular";
@@ -834,11 +914,11 @@
                 setState(COUNTDOWN);
             }    
 
-            function startNewGame() {
+           function startNewGame() {
                 setState(WAITING);
                 level = 1;
                 user.reset();
-                map.reset();
+                map.reset(level);
                 map.draw(ctx);
                 startLevel();
             }
@@ -846,8 +926,24 @@
             function keyDown(e) {
     // Si el jugador está escribiendo en una casilla de texto (nombre, correo, celular),
     // no interpretamos la tecla como un comando del juego.
+    
     var elementoActivo = document.activeElement;
-    if (elementoActivo && (elementoActivo.tagName === "INPUT" || elementoActivo.tagName === "TEXTAREA")) {
+    if (elementoActivo && (elementoActivo.tagName === "INPUT" || elementoActivo.tagName === "TEXTAREA" || elementoActivo.tagName === "SELECT")) {
+        return true;
+    }
+
+    var trivia = document.getElementById("triviaModal");
+    if (trivia && trivia.style.display === "flex") {
+        return true;
+    }
+
+    var formularioFinal = document.getElementById("gameOverModal");
+    if (formularioFinal && formularioFinal.style.display === "flex") {
+        return true;
+    }
+
+    var oferta = document.getElementById("ofertaTriviaModal");
+    if (oferta && oferta.style.display === "flex") {
         return true;
     }
 
@@ -872,8 +968,124 @@
                 return true;
             }    
 
+            var preguntasTrivia = [
+                { pregunta: "¿Delta tiene acceso directo a 16 especialidades?", respuesta: true },
+                { pregunta: "¿La telemedicina en Delta solo funciona en horario laboral?", respuesta: false },
+                { pregunta: "¿El parto en Delta tiene una carencia de 2 meses si la afiliada ingresa acompañada?", respuesta: true },
+                { pregunta: "¿Las urgencias en Delta aplican desde el primer día?", respuesta: true },
+                { pregunta: "¿Delta no ofrece Medicina General por acceso directo?", respuesta: false },
+                { pregunta: "¿Delta cubre terapias alternativas con hasta 15 sesiones al año?", respuesta: true },
+                { pregunta: "¿Las ayudas diagnósticas especializadas en Delta tienen una carencia de 4 meses?", respuesta: true },
+                { pregunta: "¿La urgencia odontológica en Delta aplica desde el primer día?", respuesta: true },
+                { pregunta: "¿La cirugía ambulatoria programada en Delta aplica desde el primer día?", respuesta: false },
+                { pregunta: "¿Delta cubre asistencia en viaje hasta por 10 días al año?", respuesta: true },
+                { pregunta: "¿La cobertura de cáncer en Delta tiene un tope de 52 millones de pesos?", respuesta: true },
+                { pregunta: "¿Delta cubre las patologías preexistentes declaradas?", respuesta: false },
+                { pregunta: "¿La habitación individual está cubierta hasta por 90 días en Delta?", respuesta: true },
+                { pregunta: "¿Delta ofrece hasta 40 terapias físicas al año?", respuesta: true },
+                { pregunta: "¿La cirugía especial en Delta tiene una carencia de 13 meses?", respuesta: true },
+                { pregunta: "¿Delta permite el reembolso en zonas sin cobertura?", respuesta: true },
+                { pregunta: "¿La cobertura de bebé en gestación en Delta aplica desde la semana 22?", respuesta: true },
+                { pregunta: "¿Gama tiene 16 especialidades de acceso directo?", respuesta: true },
+                { pregunta: "¿La telemedicina en Gama está disponible las 24 horas, los 7 días de la semana?", respuesta: true },
+                { pregunta: "¿Gama no cubre la consulta domiciliaria?", respuesta: false },
+                { pregunta: "¿La maternidad en Gama tiene una carencia de entre 4 y 7 meses?", respuesta: true },
+                { pregunta: "¿Gama ofrece hasta 30 terapias domiciliarias al año?", respuesta: true },
+                { pregunta: "¿Las ayudas diagnósticas especializadas en Gama tienen una carencia de 4 meses?", respuesta: true },
+                { pregunta: "¿La cirugía básica en Gama no tiene carencia desde el inicio?", respuesta: false },
+                { pregunta: "¿Gama excluye las urgencias?", respuesta: false },
+                { pregunta: "Gama no cubre los medicamentos ambulatorios", respuesta: true },
+                { pregunta: "¿La habitación individual en Gama está cubierta hasta por 50 días al año?", respuesta: true },
+                { pregunta: "¿Las cirugías especiales en Gama tienen una carencia de 15 meses?", respuesta: true },
+                { pregunta: "¿La odontología general en Gama aplica desde el primer día?", respuesta: true },
+                { pregunta: "¿La fertilidad está cubierta en Gama?", respuesta: false },
+                { pregunta: "¿El reembolso en Gama solo procede con auditoría?", respuesta: true },
+                { pregunta: "¿La psicología tiene acceso directo en Gama?", respuesta: true },
+                { pregunta: "¿La ortodoncia está incluida en Gama?", respuesta: false },
+                { pregunta: "¿Gama tiene cobertura nacional en 14 ciudades?", respuesta: true },
+                { pregunta: "¿Alfa tiene 16 especialidades de acceso directo?", respuesta: false },
+                { pregunta: "¿Alfa incluye Medicina Interna y Homeopatía por acceso directo?", respuesta: true },
+                { pregunta: "¿El parto en Alfa tiene una carencia de 13 meses si la afiliada ingresa acompañada?", respuesta: true },
+                { pregunta: "¿Alfa cubre el parto desde el primer día?", respuesta: false },
+                { pregunta: "¿Alfa ofrece hasta 10 terapias domiciliarias al año?", respuesta: true },
+                { pregunta: "¿Alfa incluye las ayudas diagnósticas desde el primer día?", respuesta: false },
+                { pregunta: "¿La cirugía menor está incluida desde el primer día en Alfa?", respuesta: false },
+                { pregunta: "¿Alfa no cubre los medicamentos ambulatorios?", respuesta: true },
+                { pregunta: "¿La telemedicina en Alfa está activa las 24 horas desde el primer día?", respuesta: true },
+                { pregunta: "¿Alfa excluye la diálisis crónica y el VIH?", respuesta: true },
+                { pregunta: "¿La odontología está incluida en Alfa?", respuesta: false },
+                { pregunta: "¿Alfa permite el reembolso con auditoría?", respuesta: true },
+                { pregunta: "¿La habitación individual en Alfa aplica desde el primer día?", respuesta: false },
+                { pregunta: "¿El parto en Alfa sin acompañante tiene una carencia de 15 meses?", respuesta: true },
+                { pregunta: "¿Las urgencias están cubiertas desde el primer día en Alfa?", respuesta: true },
+                { pregunta: "¿Alfa incluye terapias alternativas?", respuesta: true }
+            ];
+
             function mostrarFormularioFinal() {
                 var puntajeFinal = user.theScore();
+
+                document.getElementById("ofertaTriviaModal").style.display = "flex";
+
+                document.getElementById("btnAceptarTrivia").onclick = function() {
+                    document.getElementById("ofertaTriviaModal").style.display = "none";
+                    mostrarPreguntaTrivia(puntajeFinal);
+                };
+
+                document.getElementById("btnRechazarTrivia").onclick = function() {
+                    document.getElementById("ofertaTriviaModal").style.display = "none";
+                    mostrarFormularioGuardado(puntajeFinal);
+                };
+            }
+
+            function mostrarPreguntaTrivia(puntajeFinal) {
+                var indice = Math.floor(Math.random() * preguntasTrivia.length);
+                var preguntaActual = preguntasTrivia[indice];
+                var yaRespondido = false;
+                var tiempoRestante = 15;
+
+                document.getElementById("triviaPregunta").innerText = preguntaActual.pregunta;
+                document.getElementById("triviaTimer").innerText = "Tiempo restante: " + tiempoRestante + "s";
+                document.getElementById("triviaModal").style.display = "flex";
+
+                var intervalo = setInterval(function() {
+                    tiempoRestante--;
+                    document.getElementById("triviaTimer").innerText = "Tiempo restante: " + tiempoRestante + "s";
+
+                    if (tiempoRestante <= 0) {
+                        clearInterval(intervalo);
+                        if (!yaRespondido) {
+                            yaRespondido = true;
+                            document.getElementById("triviaModal").style.display = "none";
+                            var puntajePenalizado = Math.floor(puntajeFinal / 2);
+                            alert("¡Se acabó el tiempo! Tu puntaje se redujo a la mitad: " + puntajePenalizado);
+                            mostrarFormularioGuardado(puntajePenalizado);
+                        }
+                    }
+                }, 1000);
+
+                function responder(respuestaJugador) {
+                    if (yaRespondido) { return; }
+                    yaRespondido = true;
+                    clearInterval(intervalo);
+                    document.getElementById("triviaModal").style.display = "none";
+                    var puntajeDefinitivo = puntajeFinal;
+
+                    if (respuestaJugador === preguntaActual.respuesta) {
+                        puntajeDefinitivo = puntajeFinal * 2;
+                        alert("¡Correcto! Tu puntaje se duplicó a " + puntajeDefinitivo);
+                    } else {
+                        puntajeDefinitivo = Math.floor(puntajeFinal / 2);
+                        alert("Respuesta incorrecta. Tu puntaje se redujo a la mitad: " + puntajeDefinitivo);
+                    }
+
+                    mostrarFormularioGuardado(puntajeDefinitivo);
+                }
+
+                document.getElementById("btnVerdadero").onclick = function() { responder(true); };
+                document.getElementById("btnFalso").onclick = function() { responder(false); };
+            }
+
+            function mostrarFormularioGuardado(puntajeFinal) {
                 document.getElementById("finalScore").innerText = puntajeFinal;
                 document.getElementById("gameOverModal").dataset.puntaje = puntajeFinal;
                 document.getElementById("gameOverModal").style.display = "flex";
@@ -1035,9 +1247,14 @@
             };
             
             function completedLevel() {
+                if (level >= 5) {
+                    setState(WAITING);
+                    mostrarFormularioFinal();
+                    return;
+                }
                 setState(WAITING);
                 level += 1;
-                map.reset();
+                map.reset(level);
                 user.newLevel();
                 startLevel();
             };
@@ -1065,11 +1282,12 @@
                 map   = new Pacman.Map(blockSize);
                 user  = new Pacman.User({ 
                     "completedLevel" : completedLevel, 
-                    "eatenPill"      : eatenPill 
+                    "eatenPill"      : eatenPill,
+                    "getLevel"       : getLevel
                 }, map);
 
                 for (i = 0, len = ghostSpecs.length; i < len; i += 1) {
-                    ghost = new Pacman.Ghost({"getTick":getTick}, map, ghostSpecs[i]);
+                    ghost = new Pacman.Ghost({"getTick":getTick, "getLevel":getLevel}, map, ghostSpecs[i]);
                     ghosts.push(ghost);
                 }
                 
@@ -1108,11 +1326,12 @@
                 document.getElementById("guardarRanking").addEventListener("click", async function () {
                     console.log("Botón presionado");
 
-                    const nombre = document.getElementById("nombreJugador").value.trim();
+                  const nombre = document.getElementById("nombreJugador").value.trim();
                     const correo = document.getElementById("correoJugador").value.trim();
                     const celular = document.getElementById("celularJugador").value.trim();
+                    const sucursal = document.getElementById("sucursalJugador").value;
 
-                    if (!nombre || !correo || !celular) {
+                    if (!nombre || !correo || !celular || !sucursal) {
                         alert("Por favor completa todos los campos.");
                         return;
                     }
@@ -1126,13 +1345,14 @@
                     btnGuardar.disabled = true;
 
                     try {
-                        await window.guardarPuntaje(nombre, correo, celular, puntaje);
+                        await window.guardarPuntaje(nombre, correo, celular, sucursal, puntaje);
                         alert("¡Puntaje guardado con éxito!");
                         
                         document.getElementById("gameOverModal").style.display = "none";
                         document.getElementById("nombreJugador").value = "";
                         document.getElementById("correoJugador").value = "";
                         document.getElementById("celularJugador").value = "";
+                        document.getElementById("sucursalJugador").selectedIndex = 0;
                         btnGuardar.innerText = "Guardar Puntaje";
                         btnGuardar.disabled = false;
                         
@@ -1180,6 +1400,31 @@
         Pacman.PILL    = 4;
 
         Pacman.MAP = [
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+            [0, 4, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 4, 0],
+            [0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0],
+            [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+            [0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0],
+            [0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0],
+            [0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0],
+            [2, 2, 2, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 2, 2, 2],
+            [0, 0, 0, 0, 1, 0, 1, 0, 0, 3, 0, 0, 1, 0, 1, 0, 0, 0, 0],
+            [2, 2, 2, 2, 1, 1, 1, 0, 3, 3, 3, 0, 1, 1, 1, 2, 2, 2, 2],
+            [0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0],
+            [2, 2, 2, 0, 1, 0, 1, 1, 1, 2, 1, 1, 1, 0, 1, 0, 2, 2, 2],
+            [0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0],
+            [0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+            [0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0],
+            [0, 4, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 4, 0],
+            [0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0],
+            [0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0],
+            [0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0],
+            [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        ];
+
+Pacman.MAP_NIVEL_2_3 = [
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
             [0, 4, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 4, 0],
@@ -1202,6 +1447,134 @@
             [0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0],
             [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        ];
+
+       Pacman.MAP_NIVEL_4_5 = [
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+            [0, 4, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 4, 0],
+            [0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0],
+            [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+            [0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0],
+            [0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0],
+            [0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0],
+            [2, 2, 2, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 2, 2, 2],
+            [0, 0, 0, 0, 1, 0, 1, 0, 0, 3, 0, 0, 1, 0, 1, 0, 0, 0, 0],
+            [2, 2, 2, 2, 1, 1, 1, 0, 3, 3, 3, 0, 1, 1, 1, 2, 2, 2, 2],
+            [0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0],
+            [2, 2, 2, 0, 1, 0, 1, 1, 1, 2, 1, 1, 1, 0, 1, 0, 2, 2, 2],
+            [0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0],
+            [0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+            [0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0],
+            [0, 4, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 4, 0],
+            [0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0],
+            [0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0],
+            [0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0],
+            [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        ];
+
+        Pacman.WALLS_NIVEL_2_3 = [
+            [{"move": [19, 9.5]}, {"line": [16, 9.5]},
+             {"curve": [15.5, 9.5, 15.5, 9]}, {"line": [15.5, 8]},
+             {"curve": [15.5, 7.5, 16, 7.5]}, {"line": [18, 7.5]},
+             {"curve": [18.5, 7.5, 18.5, 7]}, {"line": [18.5, 1]},
+             {"curve": [18.5, 0.5, 18, 0.5]}, {"line": [10, 0.5]},
+             {"curve": [9.5, 0.5, 9.5, 1]}, {"line": [9.5, 3.5]}],
+
+            [{"move": [9.5, 1]},
+             {"curve": [9.5, 0.5, 9, 0.5]}, {"line": [1, 0.5]},
+             {"curve": [0.5, 0.5, 0.5, 1]}, {"line": [0.5, 7]},
+             {"curve": [0.5, 7.5, 1, 7.5]}, {"line": [3, 7.5]},
+             {"curve": [3.5, 7.5, 3.5, 8]}, {"line": [3.5, 9]},
+             {"curve": [3.5, 9.5, 3, 9.5]}, {"line": [0, 9.5]}],
+
+            [{"move": [16.5, 5.5]}, {"line": [15.5, 5.5]}],
+
+            [{"move": [16, 2.5]},
+             {"curve": [15.5, 2.5, 15.5, 3]},
+             {"curve": [15.5, 3.5, 16, 3.5]},
+             {"curve": [16.5, 3.5, 16.5, 3]},
+             {"curve": [16.5, 2.5, 16, 2.5]}],
+
+            [{"move": [3.5, 5.5]}, {"line": [2.5, 5.5]}],
+
+            [{"move": [3, 2.5]}, {"curve": [2.5, 2.5, 2.5, 3]},
+             {"curve": [2.5, 3.5, 3, 3.5]}, {"curve": [3.5, 3.5, 3.5, 3]},
+             {"curve": [3.5, 2.5, 3, 2.5]}],
+
+            [{"move": [13, 2.5]}, {"line": [12, 2.5]}, {"curve": [11.5, 2.5, 11.5, 3]},
+             {"curve": [11.5, 3.5, 12, 3.5]}, {"line": [13, 3.5]},
+             {"curve": [13.5, 3.5, 13.5, 3]}, {"curve": [13.5, 2.5, 13, 2.5]}],
+
+            [{"move": [7, 2.5]}, {"line": [6, 2.5]}, {"curve": [5.5, 2.5, 5.5, 3]},
+             {"curve": [5.5, 3.5, 6, 3.5]}, {"line": [7, 3.5]},
+             {"curve": [7.5, 3.5, 7.5, 3]}, {"curve": [7.5, 2.5, 7, 2.5]}],
+
+            [{"move": [11.5, 5.5]}, {"line": [10, 5.5]}, {"curve": [9.5, 5.5, 9.5, 6]},
+             {"line": [9.5, 7.5]}],
+            [{"move": [9.5, 6]}, {"curve": [9.5, 5.5, 8.5, 5.5]},
+             {"line": [7.5, 5.5]}],
+
+            [{"move": [13.5, 5.5]}, {"line": [13.5, 7]}, {"curve": [13.5, 7.5, 13, 7.5]},
+             {"line": [11.5, 7.5]}],
+            [{"move": [13, 7.5]}, {"curve": [13.5, 7.5, 13.5, 8]}, {"line": [13.5, 9.5]}],
+
+            [{"move": [5.5, 5.5]}, {"line": [5.5, 7]},
+             {"curve": [5.5, 7.5, 6, 7.5]}, {"line": [7.5, 7.5]}],
+            [{"move": [6, 7.5]}, {"curve": [5.5, 7.5, 5.5, 8]},
+             {"line": [5.5, 9.5]}],
+
+            [{"move": [19, 11.5]}, {"line": [16, 11.5]}, {"curve": [15.5, 11.5, 15.5, 12]},
+             {"line": [15.5, 13]}, {"curve": [15.5, 13.5, 16, 13.5]}, {"line": [18, 13.5]},
+             {"curve": [18.5, 13.5, 18.5, 14]}, {"line": [18.5, 17]},
+             {"curve": [18.5, 17.5, 18, 17.5]}, {"line": [17.5, 17.5]}],
+            [{"move": [18, 17.5]}, {"curve": [18.5, 17.5, 18.5, 18]}, {"line": [18.5, 21]},
+             {"curve": [18.5, 21.5, 18, 21.5]}, {"line": [1, 21.5]},
+             {"curve": [0.5, 21.5, 0.5, 21]}, {"line": [0.5, 18]},
+             {"curve": [0.5, 17.5, 1, 17.5]}, {"line": [1.5, 17.5]}],
+            [{"move": [1, 17.5]}, {"curve": [0.5, 17.5, 0.5, 17]},
+             {"line": [0.5, 14]}, {"curve": [0.5, 13.5, 1, 13.5]},
+             {"line": [3, 13.5]}, {"curve": [3.5, 13.5, 3.5, 13]},
+             {"line": [3.5, 12]}, {"curve": [3.5, 11.5, 3, 11.5]},
+             {"line": [0, 11.5]}],
+
+            [{"move": [13.5, 11.5]}, {"line": [13.5, 13.5]}],
+            [{"move": [5.5, 11.5]}, {"line": [5.5, 13.5]}],
+
+            [{"move": [16.5, 15.5]}, {"line": [16, 15.5]},
+             {"curve": [15.5, 15.5, 15.5, 16]}, {"line": [15.5, 17.5]}],
+            [{"move": [2.5, 15.5]}, {"line": [3, 15.5]},
+             {"curve": [3.5, 15.5, 3.5, 16]}, {"line": [3.5, 17.5]}],
+
+            [{"move": [13.5, 15.5]}, {"line": [11.5, 15.5]}],
+            [{"move": [7.5, 15.5]}, {"line": [5.5, 15.5]}],
+            
+            [{"move": [16.5, 19.5]}, {"line": [14, 19.5]},
+             {"curve": [13.5, 19.5, 13.5, 19]}, {"line": [13.5, 17.5]}],
+            [{"move": [13.5, 19]}, {"curve": [13.5, 19.5, 13, 19.5]},
+             {"line": [11.5, 19.5]}],
+
+            [{"move": [7.5, 19.5]}, {"line": [6, 19.5]},
+             {"curve": [5.5, 19.5, 5.5, 19]}, {"line": [5.5, 17.5]}],
+            [{"move": [5.5, 19]}, {"curve": [5.5, 19.5, 5, 19.5]},
+             {"line": [2.5, 19.5]}],
+
+            [{"move": [11.5, 13.5]}, {"line": [10, 13.5]},
+             {"curve": [9.5, 13.5, 9.5, 14]}, {"line": [9.5, 15.5]}],
+            [{"move": [9.5, 14]}, {"curve": [9.5, 13.5, 9, 13.5]},
+             {"line": [7.5, 13.5]}],
+
+            [{"move": [11.5, 17.5]}, {"line": [10, 17.5]},
+             {"curve": [9.5, 17.5, 9.5, 18]}, {"line": [9.5, 19.5]}],
+            [{"move": [9.5, 18]}, {"curve": [9.5, 17.5, 9, 17.5]},
+             {"line": [7.5, 17.5]}],
+
+            [{"move": [10.5, 9.5]}, {"line": [11, 9.5]}, {"curve": [11.5, 9.5, 11.5, 10]},
+             {"line": [11.5, 11]}, {"curve": [11.5, 11.5, 11, 11.5]},
+             {"line": [8, 11.5]}, {"curve": [7.5, 11.5, 7.5, 11]},
+             {"line": [7.5, 10]}, {"curve": [7.5, 9.5, 8, 9.5]},
+             {"line": [8.5, 9.5]}]
         ];
 
         Pacman.WALLS = [
@@ -1339,6 +1712,83 @@
         });
     </script>
 
+<div id="ofertaTriviaModal" style="
+    display:none;
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,.8);
+    justify-content:center;
+    align-items:center;
+    z-index:10000;
+">
+    <div style="
+        background:#111;
+        border:3px solid yellow;
+        border-radius:12px;
+        padding:25px;
+        width:350px;
+        color:white;
+        font-family:Arial;
+        text-align:center;
+    ">
+        <h2 style="color:yellow;margin-top:0;">🎁 ¡Duplica tu puntaje!</h2>
+        <p>¿Quieres responder una pregunta de verdadero o falso para intentar <strong>duplicar</strong> tu puntaje?</p>
+        <p style="color:#ff6666;">Tendrás solo 15 segundos. Si fallas o se acaba el tiempo, perderás la mitad de tus puntos.</p>
+
+        <button id="btnAceptarTrivia" style="
+            margin:8px 5px;padding:12px 20px;background:#4CAF50;
+            border:none;border-radius:8px;font-weight:bold;
+            cursor:pointer;color:white;">Sí, quiero intentar</button>
+
+        <button id="btnRechazarTrivia" style="
+            margin:8px 5px;padding:12px 20px;background:#555;
+            border:none;border-radius:8px;font-weight:bold;
+            cursor:pointer;color:white;">No, gracias</button>
+    </div>
+</div>
+
+<div id="triviaModal" style="
+        display:none;
+        position:fixed;
+        top:0;
+        left:0;
+        width:100%;
+        height:100%;
+        background:rgba(0,0,0,.8);
+        justify-content:center;
+        align-items:center;
+        z-index:10000;
+    ">
+        <div style="
+            background:#111;
+            border:3px solid yellow;
+            border-radius:12px;
+            padding:25px;
+            width:350px;
+            color:white;
+            font-family:Arial;
+            text-align:center;
+        ">
+            <h2 style="color:yellow;margin-top:0;">🎁 ¡Puntos dobles!</h2>
+            <p>Responde correctamente y duplica tu puntaje:</p>
+            <p id="triviaPregunta" style="color:#00ff66;font-weight:bold;"></p>
+            <p id="triviaTimer" style="color:#ff6666;font-weight:bold;"></p>
+
+            <button id="btnVerdadero" style="
+                margin:8px 5px;padding:12px 20px;background:#4CAF50;
+                border:none;border-radius:8px;font-weight:bold;
+                cursor:pointer;color:white;">Verdadero</button>
+
+            <button id="btnFalso" style="
+                margin:8px 5px;padding:12px 20px;background:#F44336;
+                border:none;border-radius:8px;font-weight:bold;
+                cursor:pointer;color:white;">Falso</button>
+        </div>
+    </div>
+
     <div id="gameOverModal" style="
         display:none;
         position:fixed;
@@ -1379,6 +1829,27 @@
                    type="text"
                    placeholder="Celular"
                    style="width:95%;padding:10px;margin:8px 0;">
+
+            <select id="sucursalJugador"
+                    style="width:100%;padding:10px;margin:8px 0;">
+                <option value="" disabled selected>Selecciona tu sucursal</option>
+                <option value="Sucursal Atlántico">Sucursal Atlántico</option>
+                <option value="Sucursal Bolívar">Sucursal Bolívar</option>
+                <option value="Sucursal Sucre">Sucursal Sucre</option>
+                <option value="Sucursal Córdoba">Sucursal Córdoba</option>
+                <option value="Sucursal Magdalena">Sucursal Magdalena</option>
+                <option value="Sucursal Cesar">Sucursal Cesar</option>
+                <option value="Sucursal Santander">Sucursal Santander</option>
+                <option value="Sucursal Meta">Sucursal Meta</option>
+                <option value="Sucursal Cundinamarca">Sucursal Cundinamarca</option>
+                <option value="Sucursal Antioquia">Sucursal Antioquia</option>
+                <option value="Sucursal Caldas">Sucursal Caldas</option>
+                <option value="Sucursal Risaralda">Sucursal Risaralda</option>
+                <option value="Sucursal Valle del Cauca">Sucursal Valle del Cauca</option>
+                <option value="Sucursal Tolima">Sucursal Tolima</option>
+            </select>
+
+            <button id="guardarRanking"       
 
             <button id="guardarRanking"
                     style="
