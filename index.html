@@ -875,6 +875,7 @@
                 eatenCount   = 0,
                 level        = 0,
                 tick         = 0,
+                vidaExtraOfrecida = false,
                 ghostPos, userPos, 
                 stateChanged = true,
                 timerStart   = null,
@@ -936,6 +937,7 @@
 
            function startNewGame() {
                 setState(WAITING);
+                vidaExtraOfrecida = false;
                 level = 1;
                 user.reset();
                 map.reset(level);
@@ -1050,7 +1052,7 @@
                 var indice = Math.floor(Math.random() * preguntasTrivia.length);
                 var preguntaActual = preguntasTrivia[indice];
                 var yaRespondido = false;
-                var tiempoRestante = 30;
+                var tiempoRestante = 20;
 
                 document.getElementById("vidaPregunta").innerText = preguntaActual.pregunta;
                 document.getElementById("vidaTimer").innerText = "Tiempo restante: " + tiempoRestante + "s";
@@ -1112,7 +1114,8 @@
                 var indice = Math.floor(Math.random() * preguntasTrivia.length);
                 var preguntaActual = preguntasTrivia[indice];
                 var yaRespondido = false;
-                var tiempoRestante = 30;
+                var tiempoRestante = 20
+                ;
 
                 document.getElementById("triviaPregunta").innerText = preguntaActual.pregunta;
                 document.getElementById("triviaTimer").innerText = "Tiempo restante: " + tiempoRestante + "s";
@@ -1167,8 +1170,11 @@
                 user.loseLife();
                 if (user.getLives() > 0) {
                     startLevel();
-                } else {
+                } else if (!vidaExtraOfrecida) {
+                    vidaExtraOfrecida = true;
                     mostrarPreguntaVidaExtra();
+                } else {
+                    mostrarFormularioFinal();
                 }
             }
             
