@@ -87,12 +87,12 @@
                 };
             };
 
-            function velocidadNormal() {
+           function velocidadNormal() {
                 var nivelActual = (game.getLevel) ? game.getLevel() : 1;
-                if (nivelActual >= 4) {
-                    return 4;
+                if (nivelActual >= 3) {
+                    return 6;
                 } else if (nivelActual >= 2) {
-                    return 3;
+                    return 4;
                 }
                 return 2;
             };
@@ -402,14 +402,18 @@
                 return x1 + x2;
             };
 
-            function velocidadPacman() {
+           function velocidadPacman() {
                 var nivelActual = (game.getLevel) ? game.getLevel() : 1;
-                if (nivelActual >= 4) {
-                    return 4;
+                var base = 2;
+                if (nivelActual >= 3) {
+                    base = 6;
                 } else if (nivelActual >= 2) {
-                    return 3;
+                    base = 4;
                 }
-                return 2;
+                if (game.estaEnModoVelocidad && game.estaEnModoVelocidad()) {
+                    base += 2;
+                }
+                return base;
             };
 
             function onWholeSquare(x) {
@@ -496,7 +500,7 @@
                     block === Pacman.BISCUIT || block === Pacman.PILL) {
                     
                     map.setBlock(nextWhole, Pacman.EMPTY);           
-                    addScore((block === Pacman.BISCUIT) ? 10 : 50);
+                    addScore(((block === Pacman.BISCUIT) ? 10 : 50) * ((game.estaEnModoPuntos && game.estaEnModoPuntos()) ? 2 : 1));
                     eaten += 1;
                     
                     if (eaten === map.getTotalComestibles()) {
@@ -504,7 +508,7 @@
                     }
                     
                     if (block === Pacman.PILL) { 
-                        game.eatenPill();
+                        game.eatenPill(nextWhole.x < 95);
                     }
                 }   
                         
@@ -660,7 +664,7 @@
                 var gridElegido = Pacman.MAP;
                 esMapaSimple = false;
 
-                if (nivelActual >= 4) {
+               if (nivelActual >= 3) {
                     gridElegido = Pacman.MAP_NIVEL_4_5;
                     esMapaSimple = true;
                 } else if (nivelActual >= 2) {
@@ -882,6 +886,17 @@
 
             function getLevel() {
                 return level;
+            };
+
+            var modoVelocidadActivadoEn = null;
+            var modoPuntosActivadoEn = null;
+
+            function estaEnModoVelocidad() {
+                return modoVelocidadActivadoEn !== null && (getTick() - modoVelocidadActivadoEn) < (Pacman.FPS * 8);
+            };
+
+            function estaEnModoPuntos() {
+                return modoPuntosActivadoEn !== null && (getTick() - modoPuntosActivadoEn) < (Pacman.FPS * 8);
             };
 
             function drawScore(text, position) {
@@ -1175,7 +1190,7 @@
                             audio.play("eatghost");
                             ghosts[i].eat();
                             eatenCount += 1;
-                            nScore = eatenCount * 50;
+                            nScore = eatenCount * 50 * (estaEnModoPuntos() ? 2 : 1);
                             drawScore(nScore, ghostPos[i]);
                             user.addScore(nScore);                    
                             setState(EATEN_PAUSE);
@@ -1237,17 +1252,22 @@
                 drawFooter();
             }
 
-            function eatenPill() {
+            function eatenPill(esPildoraDeVelocidad) {
                 audio.play("eatpill");
                 timerStart = tick;
                 eatenCount = 0;
+                if (esPildoraDeVelocidad) {
+                    modoVelocidadActivadoEn = tick;
+                } else {
+                    modoPuntosActivadoEn = tick;
+                }
                 for (i = 0; i < ghosts.length; i += 1) {
                     ghosts[i].makeEatable(ctx);
                 }        
             };
             
             function completedLevel() {
-                if (level >= 5) {
+                if (level >= 3) {
                     setState(WAITING);
                     mostrarFormularioFinal();
                     return;
@@ -1281,9 +1301,11 @@
                 audio = new Pacman.Audio({"soundDisabled":soundDisabled});
                 map   = new Pacman.Map(blockSize);
                 user  = new Pacman.User({ 
-                    "completedLevel" : completedLevel, 
-                    "eatenPill"      : eatenPill,
-                    "getLevel"       : getLevel
+                    "completedLevel"      : completedLevel, 
+                    "eatenPill"           : eatenPill,
+                    "getLevel"            : getLevel,
+                    "estaEnModoVelocidad" : estaEnModoVelocidad,
+                    "estaEnModoPuntos"    : estaEnModoPuntos
                 }, map);
 
                 for (i = 0, len = ghostSpecs.length; i < len; i += 1) {
