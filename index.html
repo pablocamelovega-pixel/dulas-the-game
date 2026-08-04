@@ -508,7 +508,7 @@
                     }
                     
                     if (block === Pacman.PILL) { 
-                        game.eatenPill(nextWhole.x < 95);
+                        game.eatenPill(nextWhole.x >= 95);
                     }
                 }   
                         
@@ -713,7 +713,7 @@
                             ctx.fillRect((j * blockSize), (i * blockSize), 
                                          blockSize, blockSize);
 
-                            ctx.fillStyle = "#FFF";
+                            ctx.fillStyle = (j < 9.5) ? "#d11d58" : "#ffc100";
                             ctx.arc((j * blockSize) + blockSize / 2,
                                     (i * blockSize) + blockSize / 2,
                                     Math.abs(5 - (pillSize/3)), 
@@ -1253,6 +1253,7 @@
             }
 
             function eatenPill(esPildoraDeVelocidad) {
+                console.log("Píldora comida. ¿Es de velocidad?", esPildoraDeVelocidad);
                 audio.play("eatpill");
                 timerStart = tick;
                 eatenCount = 0;
