@@ -2,7 +2,7 @@
 const AZURE_FUNCTION_URL = "https://dulas-the-game-api-abbmayetgkebfghn.centralus-01.azurewebsites.net/api/guardarPuntaje";
 
 // Función global para guardar el puntaje desde el index.html
-window.guardarPuntaje = async function(nombre, correo, sucursal, tipoParticipacion, puntaje) {
+window.guardarPuntaje = async function(nombre, correo, sucursal, tipoParticipacion, equipo, puntaje) {
     console.log("Enviando datos a Azure...");
     try {
         const respuesta = await fetch(AZURE_FUNCTION_URL, {
@@ -10,7 +10,7 @@ window.guardarPuntaje = async function(nombre, correo, sucursal, tipoParticipaci
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ nombre, correo, sucursal, tipoParticipacion, puntaje })
+            body: JSON.stringify({ nombre, correo, sucursal, tipoParticipacion, equipo, puntaje })
         });
 
         if (!respuesta.ok) {
@@ -39,16 +39,21 @@ function cargarRanking() {
             const contenedor = document.getElementById("listaSucursales");
             contenedor.innerHTML = "";
 
-            datos.rankingSucursales.forEach(function (item) {
-                const fila = document.createElement("div");
-                fila.style.border = "2px solid yellow";
-                fila.style.borderRadius = "8px";
-                fila.style.padding = "8px 12px";
-                fila.style.margin = "8px 0";
-                fila.style.display = "flex";
-                fila.style.justifyContent = "space-between";
-                fila.innerHTML = "<span>" + item.sucursal + "</span><span>" + item.puntaje + " pts</span>";
-                contenedor.appendChild(fila);
+            datos.rankingEquipos.forEach(function (equipo) {
+                const tarjeta = document.createElement("div");
+                tarjeta.style.border = "2px solid yellow";
+                tarjeta.style.borderRadius = "8px";
+                tarjeta.style.padding = "8px 12px";
+                tarjeta.style.margin = "8px 0";
+                tarjeta.style.display = "flex";
+                tarjeta.style.justifyContent = "space-between";
+                tarjeta.style.fontWeight = "bold";
+
+                tarjeta.innerHTML =
+                    "<span>" + equipo.equipo + " — " + equipo.sucursal + "</span>" +
+                    "<span>" + equipo.total + " pts</span>";
+
+                contenedor.appendChild(tarjeta);
             });
         })
         .catch(function (error) {
