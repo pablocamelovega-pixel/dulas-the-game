@@ -1,3 +1,4 @@
+// URL de tu Función de Azure
 const AZURE_FUNCTION_URL = "https://dulas-the-game-api-abbmayetgkebfghn.centralus-01.azurewebsites.net/api/guardarPuntaje";
 
 // Función global para guardar el puntaje desde el index.html
