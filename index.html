@@ -1445,11 +1445,12 @@
                   const nombre = document.getElementById("nombreJugador").value.trim();
                     const correo = document.getElementById("correoJugador").value.trim();
                     const sucursal = document.getElementById("sucursalJugador").value;
-                    const tipoParticipacion = document.querySelector('input[name="tipoParticipacion"]:checked').value;
+                    const opcionParticipacion = document.querySelector('input[name="tipoParticipacion"]:checked');
+                    const tipoParticipacion = opcionParticipacion ? opcionParticipacion.value : null;
                     const equipo = document.getElementById("equipoJugador").value.trim();
 
-                    if (!nombre || !correo || !sucursal) {
-                        alert("Por favor completa todos los campos.");
+                    if (!nombre || !correo || !sucursal || !tipoParticipacion) {
+                        alert("Por favor completa todos los campos, incluyendo el tipo de participación.");
                         return;
                     }
 
@@ -1480,6 +1481,7 @@
                         
                     } catch (error) {
                         alert("Hubo un error al guardar el puntaje. Intenta de nuevo.");
+                    } finally {
                         btnGuardar.innerText = "Guardar Puntaje";
                         btnGuardar.disabled = false;
                     }
@@ -1979,7 +1981,7 @@ Pacman.MAP_NIVEL_2_3 = [
            <div style="text-align:center;margin:10px 2px;color:white;font-family:Arial;">
                 <p style="margin:5px 0;">Tipo de participación:</p>
                 <label style="margin-right:20px;">
-                    <input type="radio" name="tipoParticipacion" id="participacionIndividual" value="Individual" checked>
+                    <input type="radio" name="tipoParticipacion" id="participacionIndividual" value="Individual">
                     Individual
                 </label>
                 <label>
