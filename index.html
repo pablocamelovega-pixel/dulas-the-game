@@ -1432,6 +1432,13 @@
                 document.addEventListener("keydown", keyDown, true);
                 document.addEventListener("keypress", keyPress, true);
 
+                document.getElementById("participacionIndividual").addEventListener("change", function () {
+                    document.getElementById("equipoJugador").style.display = "none";
+                });
+                document.getElementById("participacionGrupal").addEventListener("change", function () {
+                    document.getElementById("equipoJugador").style.display = "block";
+                });
+
                 document.getElementById("guardarRanking").addEventListener("click", async function () {
                     console.log("Botón presionado");
 
@@ -1439,9 +1446,15 @@
                     const correo = document.getElementById("correoJugador").value.trim();
                     const sucursal = document.getElementById("sucursalJugador").value;
                     const tipoParticipacion = document.querySelector('input[name="tipoParticipacion"]:checked').value;
+                    const equipo = document.getElementById("equipoJugador").value.trim();
 
                     if (!nombre || !correo || !sucursal) {
                         alert("Por favor completa todos los campos.");
+                        return;
+                    }
+
+                    if (tipoParticipacion === "Grupal" && !equipo) {
+                        alert("Por favor escribe el nombre de tu equipo.");
                         return;
                     }
 
@@ -1454,7 +1467,7 @@
                     btnGuardar.disabled = true;
 
                     try {
-                        await window.guardarPuntaje(nombre, correo, sucursal, tipoParticipacion, puntaje);
+                        await window.guardarPuntaje(nombre, correo, sucursal, tipoParticipacion, equipo, puntaje);
                         alert("¡Puntaje guardado con éxito!");
                         
                         document.getElementById("gameOverModal").style.display = "none";
@@ -1462,6 +1475,8 @@
                         document.getElementById("correoJugador").value = "";
                         document.getElementById("sucursalJugador").selectedIndex = 0;
                         document.getElementById("participacionIndividual").checked = true;
+                        document.getElementById("equipoJugador").value = "";
+                        document.getElementById("equipoJugador").style.display = "none";
                         
                     } catch (error) {
                         alert("Hubo un error al guardar el puntaje. Intenta de nuevo.");
@@ -1961,7 +1976,7 @@ Pacman.MAP_NIVEL_2_3 = [
             <p>Tu puntaje fue:</p>
             <h1 id="finalScore" style="color:#00ff66;">0</h1>
 
-            <div style="text-align:center;margin:10px 2px;color:white;font-family:Arial;">
+           <div style="text-align:center;margin:10px 2px;color:white;font-family:Arial;">
                 <p style="margin:5px 0;">Tipo de participación:</p>
                 <label style="margin-right:20px;">
                     <input type="radio" name="tipoParticipacion" id="participacionIndividual" value="Individual" checked>
@@ -1972,6 +1987,11 @@ Pacman.MAP_NIVEL_2_3 = [
                     Grupal
                 </label>
             </div>
+
+            <input id="equipoJugador"
+                   type="text"
+                   placeholder="Nombre del equipo (ej. LOS BIGOTES)"
+                   style="width:95%;padding:10px;margin:8px 0;display:none;">
 
             <input id="nombreJugador"
                    type="text"
