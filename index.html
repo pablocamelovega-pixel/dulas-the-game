@@ -46,7 +46,32 @@
     <div id="shim">shim for font face</div>
     <h1 id="tituloJuego">DULAS - THE GAME</h1>
     <p style="text-align:center;">Ayuda a DULAS a recorrer el laberinto, recoge todos los puntos y evita a los enemigos para conseguir la mayor puntuación posible.</p>
-    <div id="pacman"></div>
+    
+<div id="cajaHighScore" style="
+        max-width:400px;
+        margin:15px auto;
+        border:2px solid yellow;
+        border-radius:8px;
+        padding:10px 20px;
+        text-align:center;
+        color:yellow;
+        font-family:Arial;
+        font-weight:bold;
+        font-size:18px;
+    ">
+        High Score: <span id="highScoreValor">Cargando...</span>
+    </div>
+    
+    <div style="display:flex; justify-content:center; align-items:flex-start; gap:30px; flex-wrap:wrap;">
+
+        <div id="pacman"></div>
+
+        <div id="panelSucursales" style="width:320px; color:white; font-family:Arial;">
+            <h2 style="text-align:center;">Posiciones sucursales</h2>
+            <div id="listaSucursales">Cargando ranking...</div>
+        </div>
+
+    </div>
 
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
@@ -1412,10 +1437,10 @@
 
                   const nombre = document.getElementById("nombreJugador").value.trim();
                     const correo = document.getElementById("correoJugador").value.trim();
-                    const celular = document.getElementById("celularJugador").value.trim();
                     const sucursal = document.getElementById("sucursalJugador").value;
+                    const tipoParticipacion = document.querySelector('input[name="tipoParticipacion"]:checked').value;
 
-                    if (!nombre || !correo || !celular || !sucursal) {
+                    if (!nombre || !correo || !sucursal) {
                         alert("Por favor completa todos los campos.");
                         return;
                     }
@@ -1429,16 +1454,14 @@
                     btnGuardar.disabled = true;
 
                     try {
-                        await window.guardarPuntaje(nombre, correo, celular, sucursal, puntaje);
+                        await window.guardarPuntaje(nombre, correo, sucursal, tipoParticipacion, puntaje);
                         alert("¡Puntaje guardado con éxito!");
                         
                         document.getElementById("gameOverModal").style.display = "none";
                         document.getElementById("nombreJugador").value = "";
                         document.getElementById("correoJugador").value = "";
-                        document.getElementById("celularJugador").value = "";
                         document.getElementById("sucursalJugador").selectedIndex = 0;
-                        btnGuardar.innerText = "Guardar Puntaje";
-                        btnGuardar.disabled = false;
+                        document.getElementById("participacionIndividual").checked = true;
                         
                     } catch (error) {
                         alert("Hubo un error al guardar el puntaje. Intenta de nuevo.");
@@ -1938,6 +1961,18 @@ Pacman.MAP_NIVEL_2_3 = [
             <p>Tu puntaje fue:</p>
             <h1 id="finalScore" style="color:#00ff66;">0</h1>
 
+            <div style="text-align:center;margin:10px 2px;color:white;font-family:Arial;">
+                <p style="margin:5px 0;">Tipo de participación:</p>
+                <label style="margin-right:20px;">
+                    <input type="radio" name="tipoParticipacion" id="participacionIndividual" value="Individual" checked>
+                    Individual
+                </label>
+                <label>
+                    <input type="radio" name="tipoParticipacion" id="participacionGrupal" value="Grupal">
+                    Grupal
+                </label>
+            </div>
+
             <input id="nombreJugador"
                    type="text"
                    placeholder="Nombre completo"
@@ -1946,11 +1981,6 @@ Pacman.MAP_NIVEL_2_3 = [
             <input id="correoJugador"
                    type="email"
                    placeholder="Correo corporativo"
-                   style="width:95%;padding:10px;margin:8px 0;">
-
-            <input id="celularJugador"
-                   type="text"
-                   placeholder="Celular"
                    style="width:95%;padding:10px;margin:8px 0;">
 
             <select id="sucursalJugador"
@@ -1970,6 +2000,10 @@ Pacman.MAP_NIVEL_2_3 = [
                 <option value="Sucursal Risaralda">Sucursal Risaralda</option>
                 <option value="Sucursal Valle del Cauca">Sucursal Valle del Cauca</option>
                 <option value="Sucursal Tolima">Sucursal Tolima</option>
+                <option value="Bogotá - Sede 109">Bogotá - Sede 109</option>
+                <option value="Bogotá - Sede 68">Bogotá - Sede 68</option>
+                <option value="Bogotá - Sede Américas">Bogotá - Sede Américas</option>
+                <option value="Bogotá - Sede Pasadena">Bogotá - Sede Pasadena</option>
             </select>
 
             <button id="guardarRanking"       
