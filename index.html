@@ -10,7 +10,7 @@
     <style type="text/css">
         body {
             background-color: black;
-            width: 342px;
+            width: 1050px;
             margin: 0px auto;
             font-family: sans-serif;
         }
@@ -19,7 +19,7 @@
             height: 470px;
             width: 382px;
             border-radius: 5px;
-            margin: 20px auto;
+            margin: 20px 0;
         }
 
         #shim {
@@ -62,11 +62,28 @@
         High Score: <span id="highScoreValor">Cargando...</span>
     </div>
     
-    <div style="display:flex; justify-content:center; align-items:flex-start; gap:30px; flex-wrap:wrap;">
+    <div style="display:flex; justify-content:center; align-items:flex-start; gap:20px; flex-wrap:wrap;">
+
+        <div id="panelBogota" style="
+            width:280px;
+            max-height:520px;
+            overflow-y:auto;
+            color:white;
+            font-family:Arial;
+        ">
+            <h2 style="text-align:center;">Sedes Bogotá</h2>
+            <div id="listaBogota">Cargando ranking...</div>
+        </div>
 
         <div id="pacman"></div>
 
-        <div id="panelSucursales" style="width:320px; color:white; font-family:Arial;">
+        <div id="panelSucursales" style="
+            width:280px;
+            max-height:520px;
+            overflow-y:auto;
+            color:white;
+            font-family:Arial;
+        ">
             <h2 style="text-align:center;">Posiciones sucursales</h2>
             <div id="listaSucursales">Cargando ranking...</div>
         </div>
@@ -1439,17 +1456,28 @@
                     document.getElementById("equipoJugador").style.display = "block";
                 });
 
+                function forzarMayusculas(id) {
+                    var campo = document.getElementById(id);
+                    campo.addEventListener("input", function () {
+                        var posicion = campo.selectionStart;
+                        campo.value = campo.value.toUpperCase();
+                        campo.setSelectionRange(posicion, posicion);
+                    });
+                }
+
+                forzarMayusculas("nombreJugador");
+                forzarMayusculas("equipoJugador");
+
                 document.getElementById("guardarRanking").addEventListener("click", async function () {
                     console.log("Botón presionado");
 
-                  const nombre = document.getElementById("nombreJugador").value.trim();
-                    const correo = document.getElementById("correoJugador").value.trim();
+                    const nombre = document.getElementById("nombreJugador").value.trim();
                     const sucursal = document.getElementById("sucursalJugador").value;
                     const opcionParticipacion = document.querySelector('input[name="tipoParticipacion"]:checked');
                     const tipoParticipacion = opcionParticipacion ? opcionParticipacion.value : null;
                     const equipo = document.getElementById("equipoJugador").value.trim();
 
-                    if (!nombre || !correo || !sucursal || !tipoParticipacion) {
+                    if (!nombre || !sucursal || !tipoParticipacion) {
                         alert("Por favor completa todos los campos, incluyendo el tipo de participación.");
                         return;
                     }
@@ -1457,6 +1485,22 @@
                     if (tipoParticipacion === "Grupal" && !equipo) {
                         alert("Por favor escribe el nombre de tu equipo.");
                         return;
+                    }
+
+                    if (tipoParticipacion === "Grupal") {
+                        try {
+                            const respuestaVerificacion = await fetch(
+                                AZURE_VERIFICAR_EQUIPO_URL + "?equipo=" + encodeURIComponent(equipo) + "&nombre=" + encodeURIComponent(nombre)
+                            );
+                            const datosVerificacion = await respuestaVerificacion.json();
+
+                            if (datosVerificacion.lleno) {
+                                alert("El equipo \"" + equipo + "\" ya tiene 3 integrantes. No puedes unirte con ese nombre de equipo.");
+                                return;
+                            }
+                        } catch (error) {
+                            console.error("No se pudo verificar el cupo del equipo:", error);
+                        }
                     }
 
                     const puntaje = Number(
@@ -1468,12 +1512,11 @@
                     btnGuardar.disabled = true;
 
                     try {
-                        await window.guardarPuntaje(nombre, correo, sucursal, tipoParticipacion, equipo, puntaje);
+                        await window.guardarPuntaje(nombre, sucursal, tipoParticipacion, equipo, puntaje);
                         alert("¡Puntaje guardado con éxito!");
                         
                         document.getElementById("gameOverModal").style.display = "none";
                         document.getElementById("nombreJugador").value = "";
-                        document.getElementById("correoJugador").value = "";
                         document.getElementById("sucursalJugador").selectedIndex = 0;
                         document.getElementById("participacionIndividual").checked = true;
                         document.getElementById("equipoJugador").value = "";
@@ -1550,26 +1593,26 @@
 
 Pacman.MAP_NIVEL_2_3 = [
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-            [0, 4, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 4, 0],
-            [0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0],
+            [0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0],
+            [0, 4, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 4, 0],
+            [0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0],
+            [0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0],
+            [0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0],
+            [0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0],
+            [0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0],
             [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-            [0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0],
-            [0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0],
-            [0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0],
-            [2, 2, 2, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 2, 2, 2],
-            [0, 0, 0, 0, 1, 0, 1, 0, 0, 3, 0, 0, 1, 0, 1, 0, 0, 0, 0],
-            [2, 2, 2, 2, 1, 1, 1, 0, 3, 3, 3, 0, 1, 1, 1, 2, 2, 2, 2],
-            [0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0],
-            [2, 2, 2, 0, 1, 0, 1, 1, 1, 2, 1, 1, 1, 0, 1, 0, 2, 2, 2],
-            [0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0],
-            [0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-            [0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0],
-            [0, 4, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 4, 0],
-            [0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0],
-            [0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0],
-            [0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0],
-            [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+            [0, 0, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+            [2, 2, 2, 2, 2, 1, 0, 3, 3, 3, 3, 3, 0, 1, 2, 2, 2, 2, 2],
+            [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+            [0, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 0],
+            [0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0],
+            [0, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0],
+            [0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0],
+            [0, 1, 0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 0],
+            [0, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0],
+            [0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0],
+            [0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0],
+            [0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         ];
 
@@ -1997,16 +2040,11 @@ Pacman.MAP_NIVEL_2_3 = [
 
             <input id="nombreJugador"
                    type="text"
-                   placeholder="Nombre completo"
-                   style="width:95%;padding:10px;margin:8px 0;">
-
-            <input id="correoJugador"
-                   type="email"
-                   placeholder="Correo corporativo"
+                   placeholder="Usuario NT Ej. PABLOCAV"
                    style="width:95%;padding:10px;margin:8px 0;">
 
             <select id="sucursalJugador"
-                    style="width:100%;padding:10px;margin:8px 0;">
+                style="width:100%;padding:10px;margin:8px 0;">
                 <option value="" disabled selected>Selecciona tu sucursal</option>
                 <option value="Sucursal Atlántico">Sucursal Atlántico</option>
                 <option value="Sucursal Bolívar">Sucursal Bolívar</option>
