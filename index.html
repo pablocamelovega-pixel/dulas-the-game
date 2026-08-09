@@ -40,6 +40,182 @@
             text-decoration: none;
             color: white;
         }
+
+        @keyframes brilloNeon {
+            0%, 100% { 
+                text-shadow: 0 0 10px #ff0055, 0 0 20px #ff0055, 0 0 30px #ff00ff;
+                color: #ffccff;
+            }
+            50% { 
+                text-shadow: 0 0 20px #00eaff, 0 0 40px #00eaff, 0 0 60px #00aaff;
+                color: #ccffff;
+            }
+        }
+
+        @keyframes parpadeoStart {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        @keyframes titilarEstrella {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes moverEscaneo {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 8px; }
+        }
+
+        #pantallaInicioSNES {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center, #1a0033 0%, #000000 80%);
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20000;
+            overflow: hidden;
+            font-family: 'Pixelify Sans', monospace;
+            opacity: 1;
+            transform: scale(1);
+            transition: opacity 0.6s ease-in, transform 0.6s ease-in;
+        }
+
+        #pantallaInicioSNES.saliendo {
+            opacity: 0;
+            transform: scale(1.3);
+        }
+
+        #pantallaInicioSNES.entrando {
+            opacity: 0;
+            transform: scale(0.85);
+        }
+
+        #pantallaLogoIntro {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 30000;
+            transition: opacity 0.8s ease-out;
+            opacity: 1;
+        }
+
+        #pantallaLogoIntro.ocultando {
+            opacity: 0;
+        }
+
+        #contenedorLogoIntro {
+            position: relative;
+            display: inline-block;
+        }
+
+        #logoIntro {
+            max-width: 65vw;
+            display: block;
+            opacity: 0;
+            transition: opacity 1.2s ease-in;
+        }
+
+        #logoIntro.mostrar {
+            opacity: 1;
+        }
+
+        #contenedorLogoIntro {
+            position: relative;
+            display: inline-block;
+            overflow: hidden;
+        }
+
+        #pantallaInicioSNES::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: repeating-linear-gradient(
+                to bottom,
+                rgba(255,255,255,0.05) 0px,
+                rgba(255,255,255,0.05) 1px,
+                transparent 2px,
+                transparent 4px
+            );
+            animation: moverEscaneo 0.5s linear infinite;
+            pointer-events: none;
+        }
+
+        .estrellaSNES {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: white;
+            border-radius: 50%;
+            animation: titilarEstrella 1.8s ease-in-out infinite;
+        }
+
+        #tituloSNES {
+            font-size: 42px;
+            font-weight: bold;
+            letter-spacing: 4px;
+            margin: 0;
+            text-align: center;
+            z-index: 2;
+            background: linear-gradient(180deg, #ffffff 0%, #ffd6f7 15%, #ff7edb 30%, #ffe066 50%, #ff7edb 70%, #b967ff 85%, #ffffff 100%);
+            background-size: 100% 300%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 3px 3px 0 #3a1155, 5px 5px 6px rgba(0,0,0,0.6);
+            animation: brilloCromado 3s linear infinite;
+        }
+
+        @keyframes brilloCromado {
+            0% { background-position: 0 0%; }
+            100% { background-position: 0 100%; }
+        }
+
+        #subtituloSNES {
+            color: #66ffff;
+            font-size: 14px;
+            letter-spacing: 3px;
+            margin-top: 10px;
+            z-index: 2;
+        }
+
+        #startSNES {
+            margin-top: 60px;
+            color: #ffff00;
+            font-size: 20px;
+            letter-spacing: 2px;
+            animation: parpadeoStart 1s steps(1) infinite;
+            z-index: 2;
+        }
+
+        #footerSNES {
+            position: absolute;
+            bottom: 35px;
+            text-align: center;
+            color: white;
+            font-size: 11px;
+            letter-spacing: 1px;
+            z-index: 2;
+            line-height: 1.8;
+        }
+
+        #marcoSNES {
+            position: absolute;
+            top: 15px; left: 15px; right: 15px; bottom: 15px;
+            border: 4px solid #8844ff;
+            border-radius: 10px;
+            box-shadow: 0 0 25px #8844ff inset, 0 0 15px #8844ff;
+            pointer-events: none;
+            z-index: 2;
+        }
     </style>
 </head>
 <body>
@@ -75,7 +251,29 @@
             <div id="listaBogota">Cargando ranking...</div>
         </div>
 
-        <div id="pacman"></div>
+<div id="pantallaLogoIntro">
+        <div id="contenedorLogoIntro">
+            <img id="logoIntro" src="assets/logo-salud-total.png" alt="Salud Total EPS-S">
+        </div>
+    </div>
+
+    <audio id="audioIntro" src="assets/audio-intro.mp3" preload="auto"></audio>
+
+        <div id="pantallaInicioSNES">
+        <div id="marcoSNES"></div>
+        <div id="campoEstrellasSNES"></div>
+
+        <h1 id="tituloSNES">DULAS<br>THE GAME</h1>
+        <p id="subtituloSNES">SALUD TOTAL EPS-S PRESENTA</p>
+        <p id="startSNES">👻 PULSA ENTER PARA EMPEZAR 👻</p>
+
+        <div id="footerSNES">
+            <p>© 2026 SALUD TOTAL EPS-S</p>
+            <p>DULAS THE GAME</p>
+        </div>
+        </div>
+
+    <div id="pacman"></div>
 
         <div id="panelSucursales" style="
             width:280px;
@@ -1016,6 +1214,11 @@
         return true;
     }
 
+    var inicioSNES = document.getElementById("pantallaInicioSNES");
+    if (inicioSNES && inicioSNES.style.display !== "none") {
+        return true;
+    }
+
                 if (e.keyCode === KEY.N) {
                     startNewGame();
                 } else if (e.keyCode === KEY.S) {
@@ -1444,10 +1647,78 @@
             };
                 
             function loaded() {
-                dialog("Press N to Start");
-
                 document.addEventListener("keydown", keyDown, true);
                 document.addEventListener("keypress", keyPress, true);
+
+                var campoEstrellas = document.getElementById("campoEstrellasSNES");
+                for (var e = 0; e < 60; e += 1) {
+                    var estrella = document.createElement("div");
+                    estrella.className = "estrellaSNES";
+                    estrella.style.left = Math.random() * 100 + "%";
+                    estrella.style.top = Math.random() * 100 + "%";
+                    estrella.style.animationDelay = (Math.random() * 2) + "s";
+                    campoEstrellas.appendChild(estrella);
+                }
+
+                function iniciarDesdePantallaSNES() {
+                    var pantalla = document.getElementById("pantallaInicioSNES");
+                    if (pantalla.classList.contains("saliendo")) { return; }
+
+                    pantalla.classList.add("saliendo");
+
+                    setTimeout(function () {
+                        pantalla.style.display = "none";
+                        startNewGame();
+                    }, 600);
+                }
+
+function mostrarPantallaStart() {
+                    document.getElementById("pantallaInicioSNES").style.display = "flex";
+                }
+
+                function reproducirIntroCompleta() {
+                    var pantallaLogo = document.getElementById("pantallaLogoIntro");
+                    var logo = document.getElementById("logoIntro");
+                    var audio = document.getElementById("audioIntro");
+                    var yaContinuo = false;
+
+                    function pasarAPantallaStart() {
+                        if (yaContinuo) { return; }
+                        yaContinuo = true;
+
+                        mostrarPantallaStart();
+                        pantallaLogo.classList.add("ocultando");
+
+                        setTimeout(function () {
+                            pantallaLogo.style.display = "none";
+                        }, 800);
+                    }
+
+                    setTimeout(function () {
+                        logo.classList.add("mostrar");
+
+                        setTimeout(function () {
+                            var promesaAudio = audio.play();
+                            if (promesaAudio && promesaAudio.catch) {
+                                promesaAudio.catch(function () {
+                                    // El navegador bloqueó el audio automático: seguimos igual, sin quedarnos pegados
+                                    setTimeout(pasarAPantallaStart, 2500);
+                                });
+                            }
+                        }, 1200);
+                    }, 400);
+
+                    audio.addEventListener("ended", pasarAPantallaStart);
+                }
+
+                reproducirIntroCompleta();
+
+                document.addEventListener("keydown", function (e) {
+                    var pantalla = document.getElementById("pantallaInicioSNES");
+                    if (pantalla.style.display !== "none" && e.keyCode === 13) {
+                        iniciarDesdePantallaSNES();
+                    }
+                });
 
                 document.getElementById("participacionIndividual").addEventListener("change", function () {
                     document.getElementById("equipoJugador").style.display = "none";
@@ -2066,9 +2337,7 @@ Pacman.MAP_NIVEL_2_3 = [
                 <option value="Bogotá - Sede Pasadena">Bogotá - Sede Pasadena</option>
             </select>
 
-            <button id="guardarRanking"       
-
-            <button id="guardarRanking"
+                 <button id="guardarRanking"
                     style="
                         margin-top:15px;
                         padding:12px 25px;
