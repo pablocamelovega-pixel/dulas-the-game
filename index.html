@@ -94,6 +94,34 @@
             transform: scale(0.85);
         }
 
+        #pantallaClickInicial {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 40000;
+            transition: opacity 0.5s ease-out;
+        }
+
+        #pantallaClickInicial.ocultando {
+            opacity: 0;
+        }
+
+        #botonClickInicial {
+            color: white;
+            font-family: 'Pixelify Sans', monospace;
+            font-size: 22px;
+            letter-spacing: 2px;
+            text-align: center;
+            border: 3px solid #ffff00;
+            border-radius: 10px;
+            padding: 25px 35px;
+            cursor: pointer;
+        }
+
         #pantallaLogoIntro {
             position: fixed;
             top: 0; left: 0;
@@ -165,6 +193,9 @@
             margin: 0;
             text-align: center;
             z-index: 2;
+            position: relative;
+            top: -400px;
+            transition: top 0.8s ease-out;
             background: linear-gradient(180deg, #ffffff 0%, #ffd6f7 15%, #ff7edb 30%, #ffe066 50%, #ff7edb 70%, #b967ff 85%, #ffffff 100%);
             background-size: 100% 300%;
             -webkit-background-clip: text;
@@ -192,8 +223,65 @@
             color: #ffff00;
             font-size: 20px;
             letter-spacing: 2px;
-            animation: parpadeoStart 1s steps(1) infinite;
             z-index: 2;
+            opacity: 0;
+        }
+
+        #startSNES.mostrarStart {
+            opacity: 1;
+            animation: parpadeoStart 1s steps(1) infinite;
+        }
+
+        #tituloSNES.posicionado {
+            top: 0;
+        }
+
+        #boxeadorIntro {
+            position: absolute;
+            left: -50%;
+            bottom: 0;
+            height: 65vh;
+            max-height: 480px;
+            z-index: 3;
+            transition: left 1s cubic-bezier(0.2, 0.7, 0.3, 1);
+        }
+
+        #boxeadorIntro.posicionado {
+            left: 2%;
+        }
+
+        #bacteriaIntro {
+            position: absolute;
+            right: -50%;
+            bottom: 0;
+            height: 60vh;
+            max-height: 450px;
+            z-index: 3;
+            transition: right 1s cubic-bezier(0.2, 0.7, 0.3, 1);
+        }
+
+        #bacteriaIntro.posicionado {
+            right: 2%;
+        }
+
+        #destelloSNES {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: white;
+            opacity: 0;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        #destelloSNES.encender {
+            transition: opacity 0.3s ease-in;
+            opacity: 1;
+        }
+
+        #destelloSNES.apagar {
+            transition: opacity 0.8s ease-out;
+            opacity: 0;
         }
 
         #footerSNES {
@@ -251,7 +339,11 @@
             <div id="listaBogota">Cargando ranking...</div>
         </div>
 
-<div id="pantallaLogoIntro">
+<div id="pantallaClickInicial">
+        <div id="botonClickInicial">🔊 TOCA PARA COMENZAR 🔊</div>
+    </div>
+
+    <div id="pantallaLogoIntro">
         <div id="contenedorLogoIntro">
             <img id="logoIntro" src="assets/logo-salud-total.png" alt="Salud Total EPS-S">
         </div>
@@ -262,6 +354,10 @@
         <div id="pantallaInicioSNES">
         <div id="marcoSNES"></div>
         <div id="campoEstrellasSNES"></div>
+
+<img id="boxeadorIntro" src="assets/boxeador.png" alt="">
+        <img id="bacteriaIntro" src="assets/bacteria.png" alt="">
+        <div id="destelloSNES"></div>
 
         <h1 id="tituloSNES">DULAS<br>THE GAME</h1>
         <p id="subtituloSNES">SALUD TOTAL EPS-S PRESENTA</p>
@@ -1672,8 +1768,44 @@
                     }, 600);
                 }
 
-function mostrarPantallaStart() {
+                var animacionSNESLista = false;
+
+                function mostrarPantallaStart() {
                     document.getElementById("pantallaInicioSNES").style.display = "flex";
+                    iniciarAnimacionEntradaSNES();
+                }
+
+                function iniciarAnimacionEntradaSNES() {
+                    var boxeador = document.getElementById("boxeadorIntro");
+                    var bacteria = document.getElementById("bacteriaIntro");
+                    var titulo = document.getElementById("tituloSNES");
+                    var destello = document.getElementById("destelloSNES");
+                    var start = document.getElementById("startSNES");
+
+                    animacionSNESLista = false;
+
+                    setTimeout(function () {
+                        boxeador.classList.add("posicionado");
+                    }, 200);
+
+                    setTimeout(function () {
+                        bacteria.classList.add("posicionado");
+                    }, 1000);
+
+                    setTimeout(function () {
+                        titulo.classList.add("posicionado");
+                    }, 1900);
+
+                    setTimeout(function () {
+                        destello.classList.add("encender");
+                    }, 2800);
+
+                    setTimeout(function () {
+                        destello.classList.remove("encender");
+                        destello.classList.add("apagar");
+                        start.classList.add("mostrarStart");
+                        animacionSNESLista = true;
+                    }, 3150);
                 }
 
                 function reproducirIntroCompleta() {
@@ -1711,11 +1843,19 @@ function mostrarPantallaStart() {
                     audio.addEventListener("ended", pasarAPantallaStart);
                 }
 
-                reproducirIntroCompleta();
+                document.getElementById("botonClickInicial").addEventListener("click", function () {
+                    var pantallaClick = document.getElementById("pantallaClickInicial");
+                    pantallaClick.classList.add("ocultando");
+
+                    setTimeout(function () {
+                        pantallaClick.style.display = "none";
+                        reproducirIntroCompleta();
+                    }, 500);
+                });
 
                 document.addEventListener("keydown", function (e) {
                     var pantalla = document.getElementById("pantallaInicioSNES");
-                    if (pantalla.style.display !== "none" && e.keyCode === 13) {
+                    if (pantalla.style.display !== "none" && animacionSNESLista && e.keyCode === 13) {
                         iniciarDesdePantallaSNES();
                     }
                 });
