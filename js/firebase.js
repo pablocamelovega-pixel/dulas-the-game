@@ -85,3 +85,30 @@ window.addEventListener("load", cargarRanking);
 
 // URL de la Función que verifica el cupo del equipo
 const AZURE_VERIFICAR_EQUIPO_URL = "https://dulas-the-game-api-abbmayetgkebfghn.centralus-01.azurewebsites.net/api/verificarEquipo";
+
+// URL de la Función que guarda los premios
+const AZURE_PREMIO_URL = "https://dulas-the-game-api-abbmayetgkebfghn.centralus-01.azurewebsites.net/api/guardarPremio";
+
+window.guardarPremio = async function(nombre, sucursal, area, cargo, puntaje) {
+    console.log("Enviando premio a Azure...");
+    try {
+        const respuesta = await fetch(AZURE_PREMIO_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ nombre, sucursal, area, cargo, puntaje })
+        });
+
+        if (!respuesta.ok) {
+            throw new Error("Error del servidor: " + respuesta.status);
+        }
+
+        const resultado = await respuesta.json();
+        console.log("¡Éxito! Premio guardado:", resultado);
+
+    } catch (error) {
+        console.error("Error al guardar el premio en Azure:", error);
+        throw error;
+    }
+};
