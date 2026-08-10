@@ -661,7 +661,10 @@
                 due       = null, 
                 lives     = null,
                 score     = 5,
-                keyMap    = {};
+                keyMap    = {},
+                imagenPersonaje = new Image();
+
+            imagenPersonaje.src = "assets/perrito-dulas.png";
             
             keyMap[KEY.ARROW_LEFT]  = LEFT;
             keyMap[KEY.ARROW_UP]    = UP;
@@ -878,38 +881,54 @@
 
             function drawDead(ctx, amount) { 
                 var size = map.blockSize, 
-                    half = size / 2;
+                    half = size / 2,
+                    cx = ((position.x/10) * size) + half,
+                    cy = ((position.y/10) * size) + half;
 
                 if (amount >= 1) { 
                     return;
                 }
 
+                if (imagenPersonaje.complete && imagenPersonaje.naturalWidth > 0) {
+                    var anchoImg = size * 1.0
+                     * (1 - amount);
+                    var altoImg  = anchoImg * (imagenPersonaje.naturalHeight / imagenPersonaje.naturalWidth);
+                    ctx.save();
+                    ctx.globalAlpha = 1 - amount;
+                    ctx.drawImage(imagenPersonaje, cx - anchoImg / 2, cy - altoImg / 2, anchoImg, altoImg);
+                    ctx.restore();
+                    return;
+                }
+
                 ctx.fillStyle = "#FFFF00";
                 ctx.beginPath();        
-                ctx.moveTo(((position.x/10) * size) + half, 
-                           ((position.y/10) * size) + half);
+                ctx.moveTo(cx, cy);
                 
-                ctx.arc(((position.x/10) * size) + half, 
-                        ((position.y/10) * size) + half,
-                        half, 0, Math.PI * 2 * amount, true); 
+                ctx.arc(cx, cy, half, 0, Math.PI * 2 * amount, true); 
                 
                 ctx.fill();    
             };
 
             function draw(ctx) { 
                 var s     = map.blockSize, 
-                    angle = calcAngle(direction, position);
+                    angle = calcAngle(direction, position),
+                    cx    = ((position.x/10) * s) + s / 2,
+                    cy    = ((position.y/10) * s) + s / 2;
+
+                if (imagenPersonaje.complete && imagenPersonaje.naturalWidth > 0) {
+                    var anchoImg = s * 1.0;
+                    var altoImg  = anchoImg * (imagenPersonaje.naturalHeight / imagenPersonaje.naturalWidth);
+                    ctx.drawImage(imagenPersonaje, cx - anchoImg / 2, cy - altoImg / 2, anchoImg, altoImg);
+                    return;
+                }
 
                 ctx.fillStyle = "#FFFF00";
 
                 ctx.beginPath();        
 
-                ctx.moveTo(((position.x/10) * s) + s / 2,
-                           ((position.y/10) * s) + s / 2);
+                ctx.moveTo(cx, cy);
                 
-                ctx.arc(((position.x/10) * s) + s / 2,
-                        ((position.y/10) * s) + s / 2,
-                        s / 2, Math.PI * angle.start, 
+                ctx.arc(cx, cy, s / 2, Math.PI * angle.start, 
                         Math.PI * angle.end, angle.direction); 
                 
                 ctx.fill();    
@@ -1220,7 +1239,10 @@
                 timer        = null,
                 map          = null,
                 user         = null,
-                stored       = null;
+                stored       = null,
+                imagenVida   = new Image();
+
+            imagenVida.src = "assets/perrito-dulas.png";
 
             function getTick() { 
                 return tick;
@@ -1562,13 +1584,20 @@
                 ctx.fillStyle = "#FFFF00";
 
                 for (var i = 0, len = user.getLives(); i < len; i++) {
+                    var cxVida = 150 + (25 * i) + map.blockSize / 2,
+                        cyVida = (topLeft+1) + map.blockSize / 2;
+
+                    if (imagenVida.complete && imagenVida.naturalWidth > 0) {
+                        var tamanoVida = map.blockSize * 1.4;
+                        ctx.drawImage(imagenVida, cxVida - tamanoVida / 2, cyVida - tamanoVida / 2, tamanoVida, tamanoVida);
+                        continue;
+                    }
+
                     ctx.fillStyle = "#FFFF00";
                     ctx.beginPath();
-                    ctx.moveTo(150 + (25 * i) + map.blockSize / 2,
-                               (topLeft+1) + map.blockSize / 2);
+                    ctx.moveTo(cxVida, cyVida);
                     
-                    ctx.arc(150 + (25 * i) + map.blockSize / 2,
-                            (topLeft+1) + map.blockSize / 2,
+                    ctx.arc(cxVida, cyVida,
                             map.blockSize / 2, Math.PI * 0.25, Math.PI * 1.75, false);
                     ctx.fill();
                 }
