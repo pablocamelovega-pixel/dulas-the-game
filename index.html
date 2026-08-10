@@ -1310,6 +1310,11 @@
         return true;
     }
 
+    var premio = document.getElementById("premioModal");
+    if (premio && premio.style.display === "flex") {
+        return true;
+    }
+
     var inicioSNES = document.getElementById("pantallaInicioSNES");
     if (inicioSNES && inicioSNES.style.display !== "none") {
         return true;
@@ -1503,6 +1508,24 @@
             function mostrarFormularioGuardado(puntajeFinal) {
                 document.getElementById("finalScore").innerText = puntajeFinal;
                 document.getElementById("gameOverModal").dataset.puntaje = puntajeFinal;
+
+                if (puntajeFinal >= 20000) {
+                    document.getElementById("premioModal").style.display = "flex";
+                } else {
+                    document.getElementById("gameOverModal").style.display = "flex";
+                }
+            }
+
+            function forzarMayusculasCampo(id) {
+                var campo = document.getElementById(id);
+                campo.addEventListener("input", function () {
+                    var posicion = campo.selectionStart;
+                    campo.value = campo.value.toUpperCase();
+                    campo.setSelectionRange(posicion, posicion);
+                });
+            }
+
+            function mostrarFormularioGuardadoReal() {
                 document.getElementById("gameOverModal").style.display = "flex";
             }
 
@@ -1620,8 +1643,7 @@
                     mainDraw();
                 } else if (state === WAITING && stateChanged) {            
                     stateChanged = false;
-                    map.draw(ctx);
-                    dialog("Press N to start a New game");            
+                    map.draw(ctx);           
                 } else if (state === EATEN_PAUSE && 
                            (tick - timerStart) > (Pacman.FPS / 3)) {
                     map.draw(ctx);
@@ -1746,6 +1768,44 @@
                 document.addEventListener("keydown", keyDown, true);
                 document.addEventListener("keypress", keyPress, true);
 
+                forzarMayusculasCampo("premioNombre");
+                forzarMayusculasCampo("premioArea");
+                forzarMayusculasCampo("premioCargo");
+
+                document.getElementById("btnReclamarPremio").addEventListener("click", async function () {
+                    var nombre = document.getElementById("premioNombre").value.trim();
+                    var sucursal = document.getElementById("premioSucursal").value;
+                    var area = document.getElementById("premioArea").value.trim();
+                    var cargo = document.getElementById("premioCargo").value.trim();
+
+                    if (!nombre || !sucursal || !area || !cargo) {
+                        alert("Por favor completa todos los campos para reclamar tu premio.");
+                        return;
+                    }
+
+                    var btn = document.getElementById("btnReclamarPremio");
+                    btn.innerText = "Guardando...";
+                    btn.disabled = true;
+
+                    try {
+                        await window.guardarPremio(nombre, sucursal, area, cargo, Number(document.getElementById("gameOverModal").dataset.puntaje));
+                        alert("¡Premio registrado! Nos pondremos en contacto para la entrega.");
+
+                        document.getElementById("premioModal").style.display = "none";
+                        document.getElementById("premioNombre").value = "";
+                        document.getElementById("premioSucursal").selectedIndex = 0;
+                        document.getElementById("premioArea").value = "";
+                        document.getElementById("premioCargo").value = "";
+
+                        mostrarFormularioGuardadoReal();
+                    } catch (error) {
+                        alert("Hubo un error al registrar tu premio. Intenta de nuevo.");
+                    } finally {
+                        btn.innerText = "Reclamar premio";
+                        btn.disabled = false;
+                    }
+                });
+
                 var campoEstrellas = document.getElementById("campoEstrellasSNES");
                 for (var e = 0; e < 60; e += 1) {
                     var estrella = document.createElement("div");
@@ -1858,6 +1918,11 @@
                     if (pantalla.style.display !== "none" && animacionSNESLista && e.keyCode === 13) {
                         iniciarDesdePantallaSNES();
                     }
+                });
+
+                document.getElementById("jugarDeNuevo").addEventListener("click", function () {
+                    document.getElementById("gameOverModal").style.display = "none";
+                    startNewGame();
                 });
 
                 document.getElementById("participacionIndividual").addEventListener("change", function () {
@@ -2406,6 +2471,85 @@ Pacman.MAP_NIVEL_2_3 = [
         </div>
     </div>
 
+    <div id="premioModal" style="
+        display:none;
+        position:fixed;
+        top:0; left:0;
+        width:100%; height:100%;
+        background:rgba(0,0,0,.85);
+        justify-content:center;
+        align-items:center;
+        z-index:10500;
+    ">
+        <div style="
+            background:#111;
+            border:3px solid gold;
+            border-radius:12px;
+            padding:25px;
+            width:340px;
+            color:white;
+            font-family:Arial;
+            text-align:center;
+            max-height:85vh;
+            overflow-y:auto;
+        ">
+            <h2 style="color:gold;margin-top:0;">🏆 ¡Felicidades! 🏆</h2>
+            <p>Llegaste a los <strong>28.000 puntos</strong> y ganaste un <strong>perro Dulas de peluche</strong> 🐶</p>
+            <p style="font-size:13px;color:#ccc;">Completa tus datos para reclamar tu premio:</p>
+
+            <input id="premioNombre"
+                   type="text"
+                   placeholder="Nombre completo"
+                   style="width:95%;padding:10px;margin:8px 0;">
+
+            <select id="premioSucursal"
+                    style="width:100%;padding:10px;margin:8px 0;">
+                <option value="" disabled selected>Selecciona tu sucursal</option>
+                <option value="Sucursal Atlántico">Sucursal Atlántico</option>
+                <option value="Sucursal Bolívar">Sucursal Bolívar</option>
+                <option value="Sucursal Sucre">Sucursal Sucre</option>
+                <option value="Sucursal Córdoba">Sucursal Córdoba</option>
+                <option value="Sucursal Magdalena">Sucursal Magdalena</option>
+                <option value="Sucursal Cesar">Sucursal Cesar</option>
+                <option value="Sucursal Santander">Sucursal Santander</option>
+                <option value="Sucursal Meta">Sucursal Meta</option>
+                <option value="Sucursal Cundinamarca">Sucursal Cundinamarca</option>
+                <option value="Sucursal Antioquia">Sucursal Antioquia</option>
+                <option value="Sucursal Caldas">Sucursal Caldas</option>
+                <option value="Sucursal Risaralda">Sucursal Risaralda</option>
+                <option value="Sucursal Valle del Cauca">Sucursal Valle del Cauca</option>
+                <option value="Sucursal Tolima">Sucursal Tolima</option>
+                <option value="Bogotá - Sede 109">Bogotá - Sede 109</option>
+                <option value="Bogotá - Sede 68">Bogotá - Sede 68</option>
+                <option value="Bogotá - Sede Américas">Bogotá - Sede Américas</option>
+                <option value="Bogotá - Sede Pasadena">Bogotá - Sede Pasadena</option>
+            </select>
+
+            <input id="premioArea"
+                   type="text"
+                   placeholder="Área"
+                   style="width:95%;padding:10px;margin:8px 0;">
+
+            <input id="premioCargo"
+                   type="text"
+                   placeholder="Cargo"
+                   style="width:95%;padding:10px;margin:8px 0;">
+
+            <button id="btnReclamarPremio"
+                    style="
+                        margin-top:10px;
+                        padding:12px 25px;
+                        background:gold;
+                        border:none;
+                        border-radius:8px;
+                        font-weight:bold;
+                        cursor:pointer;
+                    ">
+                Reclamar premio
+            </button>
+        </div>
+    </div>
+
     <div id="gameOverModal" style="
         display:none;
         position:fixed;
@@ -2488,6 +2632,21 @@ Pacman.MAP_NIVEL_2_3 = [
                         cursor:pointer;
                     ">
                 Guardar Puntaje
+            </button>
+
+            <button id="jugarDeNuevo"
+                    style="
+                        margin-top:15px;
+                        margin-left:10px;
+                        padding:12px 25px;
+                        background:#33aaff;
+                        border:none;
+                        border-radius:8px;
+                        font-weight:bold;
+                        cursor:pointer;
+                        color:white;
+                    ">
+                Jugar de nuevo
             </button>
         </div>
     </div>
