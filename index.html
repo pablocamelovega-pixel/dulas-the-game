@@ -359,8 +359,8 @@
         <img id="bacteriaIntro" src="assets/bacteria.png" alt="">
         <div id="destelloSNES"></div>
 
+        <p id="subtituloSNES">LOS PLANES COMPLEMENTARIOS PRESENTAN</p>
         <h1 id="tituloSNES">DULAS<br>THE GAME</h1>
-        <p id="subtituloSNES">SALUD TOTAL EPS-S PRESENTA</p>
         <p id="startSNES">👻 PULSA ENTER PARA EMPEZAR 👻</p>
 
         <div id="footerSNES">
@@ -1230,6 +1230,7 @@
                 eatenCount   = 0,
                 level        = 0,
                 tick         = 0,
+                registroTrivia = [],
                 vidaExtraOfrecida = false,
                 ghostPos, userPos, 
                 stateChanged = true,
@@ -1295,6 +1296,7 @@
 
            function startNewGame() {
                 setState(WAITING);
+                registroTrivia = [];
                 vidaExtraOfrecida = false;
                 level = 1;
                 user.reset();
@@ -1364,56 +1366,63 @@
             }    
 
             var preguntasTrivia = [
-                { pregunta: "¿Delta tiene acceso directo a 16 especialidades?", respuesta: true },
-                { pregunta: "¿La telemedicina en Delta solo funciona en horario laboral?", respuesta: false },
-                { pregunta: "¿El parto en Delta tiene una carencia de 2 meses si la afiliada ingresa acompañada?", respuesta: true },
-                { pregunta: "¿Las urgencias en Delta aplican desde el primer día?", respuesta: true },
-                { pregunta: "¿Delta no ofrece Medicina General por acceso directo?", respuesta: false },
-                { pregunta: "¿Delta cubre terapias alternativas con hasta 15 sesiones al año?", respuesta: true },
-                { pregunta: "¿Las ayudas diagnósticas especializadas en Delta tienen una carencia de 4 meses?", respuesta: true },
-                { pregunta: "¿La urgencia odontológica en Delta aplica desde el primer día?", respuesta: true },
-                { pregunta: "¿La cirugía ambulatoria programada en Delta aplica desde el primer día?", respuesta: false },
-                { pregunta: "¿Delta cubre asistencia en viaje hasta por 10 días al año?", respuesta: true },
-                { pregunta: "¿La cobertura de cáncer en Delta tiene un tope de 52 millones de pesos?", respuesta: true },
-                { pregunta: "¿Delta cubre las patologías preexistentes declaradas?", respuesta: false },
-                { pregunta: "¿La habitación individual está cubierta hasta por 90 días en Delta?", respuesta: true },
-                { pregunta: "¿Delta ofrece hasta 40 terapias físicas al año?", respuesta: true },
-                { pregunta: "¿La cirugía especial en Delta tiene una carencia de 13 meses?", respuesta: true },
-                { pregunta: "¿Delta permite el reembolso en zonas sin cobertura?", respuesta: true },
-                { pregunta: "¿La cobertura de bebé en gestación en Delta aplica desde la semana 22?", respuesta: true },
-                { pregunta: "¿Gama tiene 16 especialidades de acceso directo?", respuesta: true },
-                { pregunta: "¿La telemedicina en Gama está disponible las 24 horas, los 7 días de la semana?", respuesta: true },
-                { pregunta: "¿Gama no cubre la consulta domiciliaria?", respuesta: false },
-                { pregunta: "¿La maternidad en Gama tiene una carencia de entre 4 y 7 meses?", respuesta: true },
-                { pregunta: "¿Gama ofrece hasta 30 terapias domiciliarias al año?", respuesta: true },
-                { pregunta: "¿Las ayudas diagnósticas especializadas en Gama tienen una carencia de 4 meses?", respuesta: true },
-                { pregunta: "¿La cirugía básica en Gama no tiene carencia desde el inicio?", respuesta: false },
-                { pregunta: "¿Gama excluye las urgencias?", respuesta: false },
-                { pregunta: "Gama no cubre los medicamentos ambulatorios", respuesta: true },
-                { pregunta: "¿La habitación individual en Gama está cubierta hasta por 50 días al año?", respuesta: true },
-                { pregunta: "¿Las cirugías especiales en Gama tienen una carencia de 15 meses?", respuesta: true },
-                { pregunta: "¿La odontología general en Gama aplica desde el primer día?", respuesta: true },
-                { pregunta: "¿La fertilidad está cubierta en Gama?", respuesta: false },
-                { pregunta: "¿El reembolso en Gama solo procede con auditoría?", respuesta: true },
-                { pregunta: "¿La psicología tiene acceso directo en Gama?", respuesta: true },
-                { pregunta: "¿La ortodoncia está incluida en Gama?", respuesta: false },
-                { pregunta: "¿Gama tiene cobertura nacional en 14 ciudades?", respuesta: true },
-                { pregunta: "¿Alfa tiene 16 especialidades de acceso directo?", respuesta: false },
-                { pregunta: "¿Alfa incluye Medicina Interna y Homeopatía por acceso directo?", respuesta: true },
-                { pregunta: "¿El parto en Alfa tiene una carencia de 13 meses si la afiliada ingresa acompañada?", respuesta: true },
-                { pregunta: "¿Alfa cubre el parto desde el primer día?", respuesta: false },
-                { pregunta: "¿Alfa ofrece hasta 10 terapias domiciliarias al año?", respuesta: true },
-                { pregunta: "¿Alfa incluye las ayudas diagnósticas desde el primer día?", respuesta: false },
-                { pregunta: "¿La cirugía menor está incluida desde el primer día en Alfa?", respuesta: false },
-                { pregunta: "¿Alfa no cubre los medicamentos ambulatorios?", respuesta: true },
-                { pregunta: "¿La telemedicina en Alfa está activa las 24 horas desde el primer día?", respuesta: true },
-                { pregunta: "¿Alfa excluye la diálisis crónica y el VIH?", respuesta: true },
-                { pregunta: "¿La odontología está incluida en Alfa?", respuesta: false },
-                { pregunta: "¿Alfa permite el reembolso con auditoría?", respuesta: true },
-                { pregunta: "¿La habitación individual en Alfa aplica desde el primer día?", respuesta: false },
-                { pregunta: "¿El parto en Alfa sin acompañante tiene una carencia de 15 meses?", respuesta: true },
-                { pregunta: "¿Las urgencias están cubiertas desde el primer día en Alfa?", respuesta: true },
-                { pregunta: "¿Alfa incluye terapias alternativas?", respuesta: true }
+                { pregunta: "¿El Plan Delta tiene acceso directo a 16 especialidades?", respuesta: true },
+                { pregunta: "¿La telemedicina en el Plan Delta solo funciona en horario laboral?", respuesta: false },
+                { pregunta: "¿La cobertura de maternidad hace parte del Plan Alfa y Gama?", respuesta: false },
+                { pregunta: "¿Las urgencias en el Plan Delta aplican desde el primer día?", respuesta: true },
+                { pregunta: "¿El Plan Delta ofrece medicina general por acceso directo?", respuesta: true },
+                { pregunta: "¿El Plan Delta cubre terapias alternativas?", respuesta: true },
+                { pregunta: "¿En el Plan Alfa se ofrece la cobertura Bebé en Gestación?", respuesta: false },
+                { pregunta: "¿La urgencia odontológica en el Plan Delta aplica desde el primer día?", respuesta: true },
+                { pregunta: "¿La cirugía ambulatoria programada en el Plan Delta aplica desde el primer día?", respuesta: false },
+                { pregunta: "¿El Plan Delta cubre asistencia en viaje hasta por 10 días al año?", respuesta: true },
+                { pregunta: "¿El Plan Delta cubre patologías preexistentes declaradas?", respuesta: false },
+                { pregunta: "¿El Plan Delta cubre habitación individual durante 90 días?", respuesta: true },
+                { pregunta: "¿El Plan Delta ofrece 40 terapias físicas anuales bajo pertinencia médica?", respuesta: true },
+                { pregunta: "¿El Plan delta posee cobertura para hospitalización domiciliaria bajo pertinencia médica?", respuesta: true },
+                { pregunta: "¿El Plan Gama tiene acceso directo a 16 especialidades?", respuesta: true },
+                { pregunta: "¿La telemedicina en el Plan Gama está disponible 24/7?", respuesta: true },
+                { pregunta: "¿El Plan Gama cubre consulta domiciliaria?", respuesta: true },
+                { pregunta: "¿Un periodo de carencia es el tiempo ininterrumpido mínimo para acceder a ciertas coberturas de servicios?", respuesta: true },
+                { pregunta: "¿El Plan Gama ofrece 30 terapias domiciliarias anuales?", respuesta: true },
+                { pregunta: "¿EL periodo de carencia de las ayudas diagnósticas especializadas en el Plan Gama es apartir del primer día del mes 4?", respuesta: true },
+                { pregunta: "¿Las cirugías básicas en el Plan Gama no tienen carencia y aplican desde el inicio?", respuesta: false },
+                { pregunta: "¿El Plan Gama excluye las urgencias?", respuesta: false },
+                { pregunta: "¿El Plan Gama cubre medicamentos ambulatorios?", respuesta: false },
+                { pregunta: "¿El Plan Gama cubre habitación individual hasta por 50 días al año?", respuesta: true },
+                { pregunta: "¿La odontología general en el Plan Gama aplica desde el primer día?", respuesta: true },
+                { pregunta: "¿El Plan Gama cubre procedimientos de fertilidad?", respuesta: false },
+                { pregunta: "¿El Plan Complementario cubre médicamentos?", respuesta: false },
+                { pregunta: "¿Psicología tiene acceso directo en el Plan Gama?", respuesta: true },
+                { pregunta: "¿La ortodoncia está incluida en el Plan Gama?", respuesta: false },
+                { pregunta: "¿El Plan Gama tiene cobertura nacional en 14 ciudades?", respuesta: true },
+                { pregunta: "¿El Plan Alfa tiene acceso directo a 16 especialidades?", respuesta: false },
+                { pregunta: "¿El Plan Alfa incluye medicina interna y homeopatía por acceso directo?", respuesta: true },
+                { pregunta: "¿El Plan Alfa cubre parto desde el primer día?", respuesta: false },
+                { pregunta: "¿El Plan Alfa ofrece 10 terapias domiciliarias al año bajo pertinencia médica?", respuesta: true },
+                { pregunta: "¿El Plan Alfa incluye ayudas diagnósticas desde el primer día?", respuesta: false },
+                { pregunta: "¿La cirugía menor está incluida desde el primer día en el Plan Alfa?", respuesta: false },
+                { pregunta: "¿La telemedicina en el Plan Alfa está activa 24/7 desde el primer día?", respuesta: true },
+                { pregunta: "¿El Plan Alfa excluye diálisis crónica y VIH?", respuesta: true },
+                { pregunta: "¿La odontología está incluida en el Plan Alfa?", respuesta: false },
+                { pregunta: "¿Para adquirir el Plan Alfa se requiere auditoría médica?", respuesta: false },
+                { pregunta: "¿El Plan Alfa cubre habitación individual desde el primer día?", respuesta: false },
+                { pregunta: "¿Al tener un Plan Complementario me atienden prioritariamente en urgencias?", respuesta: false },
+                { pregunta: "¿El Plan Alfa incluye terapias alternativas?", respuesta: false },
+                { pregunta: "¿Los Planes complementarios Delta, Gama y Alfa son adicionales al PBS?", respuesta: true },
+                { pregunta: "¿El Plan Alfa ofrece telemedicina desde el primer día?", respuesta: true },
+                { pregunta: "¿Los Planes Delta, Gama y Alfa pertenecen a Salud Total EPS-S?", respuesta: true },
+                { pregunta: "¿Los Planes Complementarios requieren afiliación previa al PBS?", respuesta: true },
+                { pregunta: "¿Las consultas de especialidades con acceso directo en el Plan Delta no requieren pago moderador en los CIA?", respuesta: true },
+                { pregunta: "¿La sigla CIA significa “Centro Integral de Atención”?", respuesta: true },
+                { pregunta: "¿El médico domiciliario puede tardar hasta 24 horas en llegar desde el momento de la solicitud?", respuesta: false },
+                { pregunta: "¿Odontopediatría y Optometría son especialidades de acceso directo en el Plan Delta?", respuesta: true },
+                { pregunta: "¿El pago moderador en consultas médicas del Plan Delta en los CIA es de $0?", respuesta: true },
+                { pregunta: "¿El beneficio de Telemedicina del PAC está disponible 24/7 y se accede sin pagos moderadores?", respuesta: true },
+                { pregunta: "La auditoría médica tiene como objetivo principal evaluar la calidad de la atención en salud y el cumplimiento de las guías y protocolos establecidos.", respuesta: false },
+                { pregunta: "¿El Plan Alfa cubre hospitalización y cirugía?", respuesta: false },
+                { pregunta: "Las citas de acceso directo pueden tomar hasta 11 días habiles", respuesta: false },
+                { pregunta: "¿Es cierto que este año los Planes Complementarios PAC cumplen 10 años complementando la salud de las familias colombianas?", respuesta: false }
             ];
 
             function mostrarPreguntaVidaExtra() {
@@ -1435,6 +1444,7 @@
                         if (!yaRespondido) {
                             yaRespondido = true;
                             document.getElementById("vidaExtraModal").style.display = "none";
+                            registroTrivia.push({ tipo: "vida", pregunta: preguntaActual.pregunta, resultado: "sinTiempo" });
                             alert("¡Se acabó el tiempo! No se otorgó la vida extra.");
                             mostrarFormularioFinal();
                         }
@@ -1448,11 +1458,13 @@
                     document.getElementById("vidaExtraModal").style.display = "none";
 
                     if (respuestaJugador === preguntaActual.respuesta) {
+                        registroTrivia.push({ tipo: "vida", pregunta: preguntaActual.pregunta, resultado: "correcta" });
                         alert("¡Correcto! Ganaste una vida extra.");
                         user.addLife();
                         setState(WAITING);
                         startLevel();
                     } else {
+                        registroTrivia.push({ tipo: "vida", pregunta: preguntaActual.pregunta, resultado: "incorrecta" });
                         alert("Respuesta incorrecta. No se otorgó la vida extra.");
                         mostrarFormularioFinal();
                     }
@@ -1498,6 +1510,7 @@
                         if (!yaRespondido) {
                             yaRespondido = true;
                             document.getElementById("triviaModal").style.display = "none";
+                            registroTrivia.push({ tipo: "puntos", pregunta: preguntaActual.pregunta, resultado: "sinTiempo" });
                             var puntajePenalizado = Math.floor(puntajeFinal / 2);
                             alert("¡Se acabó el tiempo! Tu puntaje se redujo a la mitad: " + puntajePenalizado);
                             mostrarFormularioGuardado(puntajePenalizado);
@@ -1513,9 +1526,11 @@
                     var puntajeDefinitivo = puntajeFinal;
 
                     if (respuestaJugador === preguntaActual.respuesta) {
+                        registroTrivia.push({ tipo: "puntos", pregunta: preguntaActual.pregunta, resultado: "correcta" });
                         puntajeDefinitivo = puntajeFinal * 2;
                         alert("¡Correcto! Tu puntaje se duplicó a " + puntajeDefinitivo);
                     } else {
+                        registroTrivia.push({ tipo: "puntos", pregunta: preguntaActual.pregunta, resultado: "incorrecta" });
                         puntajeDefinitivo = Math.floor(puntajeFinal / 2);
                         alert("Respuesta incorrecta. Tu puntaje se redujo a la mitad: " + puntajeDefinitivo);
                     }
@@ -1955,9 +1970,11 @@
                 });
 
                 document.getElementById("participacionIndividual").addEventListener("change", function () {
+                    document.getElementById("camposFormularioPuntaje").style.display = "block";
                     document.getElementById("equipoJugador").style.display = "none";
                 });
                 document.getElementById("participacionGrupal").addEventListener("change", function () {
+                    document.getElementById("camposFormularioPuntaje").style.display = "block";
                     document.getElementById("equipoJugador").style.display = "block";
                 });
 
@@ -2017,15 +2034,17 @@
                     btnGuardar.disabled = true;
 
                     try {
-                        await window.guardarPuntaje(nombre, sucursal, tipoParticipacion, equipo, puntaje);
+                        await window.guardarPuntaje(nombre, sucursal, tipoParticipacion, equipo, puntaje, registroTrivia);
                         alert("¡Puntaje guardado con éxito!");
                         
                         document.getElementById("gameOverModal").style.display = "none";
                         document.getElementById("nombreJugador").value = "";
                         document.getElementById("sucursalJugador").selectedIndex = 0;
-                        document.getElementById("participacionIndividual").checked = true;
+                        document.getElementById("participacionIndividual").checked = false;
+                        document.getElementById("participacionGrupal").checked = false;
                         document.getElementById("equipoJugador").value = "";
                         document.getElementById("equipoJugador").style.display = "none";
+                        document.getElementById("camposFormularioPuntaje").style.display = "none";
                         
                     } catch (error) {
                         alert("Hubo un error al guardar el puntaje. Intenta de nuevo.");
@@ -2622,46 +2641,53 @@ Pacman.MAP_NIVEL_2_3 = [
                    placeholder="Nombre del equipo (ej. LOS BIGOTES)"
                    style="width:95%;padding:10px;margin:8px 0;display:none;">
 
-            <input id="nombreJugador"
-                   type="text"
-                   placeholder="Usuario NT Ej. PABLOCAV"
-                   style="width:95%;padding:10px;margin:8px 0;">
+            <div id="camposFormularioPuntaje" style="display:none;">
+                <input id="equipoJugador"
+                       type="text"
+                       placeholder="Nombre del equipo (ej. LOS BIGOTES)"
+                       style="width:95%;padding:10px;margin:8px 0;display:none;">
 
-            <select id="sucursalJugador"
-                style="width:100%;padding:10px;margin:8px 0;">
-                <option value="" disabled selected>Selecciona tu sucursal</option>
-                <option value="Sucursal Atlántico">Sucursal Atlántico</option>
-                <option value="Sucursal Bolívar">Sucursal Bolívar</option>
-                <option value="Sucursal Sucre">Sucursal Sucre</option>
-                <option value="Sucursal Córdoba">Sucursal Córdoba</option>
-                <option value="Sucursal Magdalena">Sucursal Magdalena</option>
-                <option value="Sucursal Cesar">Sucursal Cesar</option>
-                <option value="Sucursal Santander">Sucursal Santander</option>
-                <option value="Sucursal Meta">Sucursal Meta</option>
-                <option value="Sucursal Cundinamarca">Sucursal Cundinamarca</option>
-                <option value="Sucursal Antioquia">Sucursal Antioquia</option>
-                <option value="Sucursal Caldas">Sucursal Caldas</option>
-                <option value="Sucursal Risaralda">Sucursal Risaralda</option>
-                <option value="Sucursal Valle del Cauca">Sucursal Valle del Cauca</option>
-                <option value="Sucursal Tolima">Sucursal Tolima</option>
-                <option value="Bogotá - Sede 109">Bogotá - Sede 109</option>
-                <option value="Bogotá - Sede 68">Bogotá - Sede 68</option>
-                <option value="Bogotá - Sede Américas">Bogotá - Sede Américas</option>
-                <option value="Bogotá - Sede Pasadena">Bogotá - Sede Pasadena</option>
-            </select>
+                <input id="nombreJugador"
+                       type="text"
+                       placeholder="Usuario NT Ej. PABLOCAV"
+                       style="width:95%;padding:10px;margin:8px 0;">
 
-                 <button id="guardarRanking"
-                    style="
-                        margin-top:15px;
-                        padding:12px 25px;
-                        background:#FFD700;
-                        border:none;
-                        border-radius:8px;
-                        font-weight:bold;
-                        cursor:pointer;
-                    ">
-                Guardar Puntaje
-            </button>
+                <select id="sucursalJugador"
+                    style="width:100%;padding:10px;margin:8px 0;">
+                    <option value="" disabled selected>Selecciona tu sucursal</option>
+                    <option value="Sucursal Atlántico">Sucursal Atlántico</option>
+                    <option value="Sucursal Bolívar">Sucursal Bolívar</option>
+                    <option value="Sucursal Sucre">Sucursal Sucre</option>
+                    <option value="Sucursal Córdoba">Sucursal Córdoba</option>
+                    <option value="Sucursal Magdalena">Sucursal Magdalena</option>
+                    <option value="Sucursal Cesar">Sucursal Cesar</option>
+                    <option value="Sucursal Santander">Sucursal Santander</option>
+                    <option value="Sucursal Meta">Sucursal Meta</option>
+                    <option value="Sucursal Cundinamarca">Sucursal Cundinamarca</option>
+                    <option value="Sucursal Antioquia">Sucursal Antioquia</option>
+                    <option value="Sucursal Caldas">Sucursal Caldas</option>
+                    <option value="Sucursal Risaralda">Sucursal Risaralda</option>
+                    <option value="Sucursal Valle del Cauca">Sucursal Valle del Cauca</option>
+                    <option value="Sucursal Tolima">Sucursal Tolima</option>
+                    <option value="Bogotá - Sede 109">Bogotá - Sede 109</option>
+                    <option value="Bogotá - Sede 68">Bogotá - Sede 68</option>
+                    <option value="Bogotá - Sede Américas">Bogotá - Sede Américas</option>
+                    <option value="Bogotá - Sede Pasadena">Bogotá - Sede Pasadena</option>
+                </select>
+
+                     <button id="guardarRanking"
+                        style="
+                            margin-top:15px;
+                            padding:12px 25px;
+                            background:#FFD700;
+                            border:none;
+                            border-radius:8px;
+                            font-weight:bold;
+                            cursor:pointer;
+                        ">
+                    Guardar Puntaje
+                </button>
+            </div>
 
             <button id="jugarDeNuevo"
                     style="
