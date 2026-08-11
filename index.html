@@ -1365,6 +1365,26 @@
                 return true;
             }    
 
+            var preguntasDisponibles = [];
+
+            function mezclarArray(arr) {
+                var copia = arr.slice();
+                for (var i = copia.length - 1; i > 0; i--) {
+                    var j = Math.floor(Math.random() * (i + 1));
+                    var temp = copia[i];
+                    copia[i] = copia[j];
+                    copia[j] = temp;
+                }
+                return copia;
+            }
+
+            function obtenerSiguientePregunta() {
+                if (preguntasDisponibles.length === 0) {
+                    preguntasDisponibles = mezclarArray(preguntasTrivia);
+                }
+                return preguntasDisponibles.pop();
+            }
+
             var preguntasTrivia = [
                 { pregunta: "¿El Plan Delta tiene acceso directo a 16 especialidades?", respuesta: true },
                 { pregunta: "¿La telemedicina en el Plan Delta solo funciona en horario laboral?", respuesta: false },
@@ -1426,12 +1446,11 @@
             ];
 
             function mostrarPreguntaVidaExtra() {
-                var indice = Math.floor(Math.random() * preguntasTrivia.length);
-                var preguntaActual = preguntasTrivia[indice];
+                var preguntaActual = obtenerSiguientePregunta();
                 var yaRespondido = false;
                 var tiempoRestante = 20;
 
-                document.getElementById("vidaPregunta").innerText = preguntaActual.pregunta;
+                document.getElementById("triviaPregunta").innerText = preguntaActual.pregunta;
                 document.getElementById("vidaTimer").innerText = "Tiempo restante: " + tiempoRestante + "s";
                 document.getElementById("vidaExtraModal").style.display = "flex";
 
@@ -1491,11 +1510,9 @@
             }
 
             function mostrarPreguntaTrivia(puntajeFinal) {
-                var indice = Math.floor(Math.random() * preguntasTrivia.length);
-                var preguntaActual = preguntasTrivia[indice];
+                var preguntaActual = obtenerSiguientePregunta();
                 var yaRespondido = false;
-                var tiempoRestante = 20
-                ;
+                var tiempoRestante = 20;
 
                 document.getElementById("triviaPregunta").innerText = preguntaActual.pregunta;
                 document.getElementById("triviaTimer").innerText = "Tiempo restante: " + tiempoRestante + "s";
