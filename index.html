@@ -10,13 +10,31 @@
     <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
     <style type="text/css">
         body {
-            background-color: black;
+            background: radial-gradient(ellipse at center, #1a0033 0%, #000000 80%);
             width: 100%;
             max-width: 1050px;
             margin: 0px auto;
             font-family: sans-serif;
             box-sizing: border-box;
             padding: 0 10px;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: repeating-linear-gradient(
+                to bottom,
+                rgba(255,255,255,0.05) 0px,
+                rgba(255,255,255,0.05) 1px,
+                transparent 2px,
+                transparent 4px
+            );
+            animation: moverEscaneo 0.5s linear infinite;
+            pointer-events: none;
+            z-index: 0;
         }
 
         #pacman {
@@ -25,6 +43,8 @@
             height: auto;
             border-radius: 5px;
             margin: 20px auto;
+            position: relative;
+            z-index: 1;
         }
 
         #shim {
@@ -899,7 +919,7 @@
                 var imagenActual = bocaAbierta ? imagenAbierta : imagenCerrada;
 
                 if (imagenActual.complete && imagenActual.naturalWidth > 0) {
-                    var anchoImg = s * 1.4;
+                    var anchoImg = s * 1.3;
                     var altoImg  = anchoImg * (imagenActual.naturalHeight / imagenActual.naturalWidth);
 
                     ctx.save();
@@ -1065,8 +1085,7 @@
                         if (map[i][j] === Pacman.PILL) {
                             ctx.beginPath();
 
-                            ctx.fillStyle = "#000";
-                            ctx.fillRect((j * blockSize), (i * blockSize), 
+                            ctx.clearRect((j * blockSize), (i * blockSize), 
                                          blockSize, blockSize);
 
                             ctx.fillStyle = (j < 9.5) ? "#d11d58" : "#ffc100";
@@ -1085,8 +1104,7 @@
             function draw(ctx) {
                 var i, j, size = blockSize;
 
-                ctx.fillStyle = "#000";
-                ctx.fillRect(0, 0, width * size, height * size);
+                ctx.clearRect(0, 0, width * size, height * size);
 
                 drawWall(ctx);
                 
@@ -1109,8 +1127,7 @@
                 if (layout === Pacman.EMPTY || layout === Pacman.BLOCK || 
                     layout === Pacman.BISCUIT) {
                     
-                    ctx.fillStyle = "#000";
-                    ctx.fillRect((x * blockSize), (y * blockSize), 
+                    ctx.clearRect((x * blockSize), (y * blockSize), 
                                  blockSize, blockSize);
 
                     if (layout === Pacman.BISCUIT) {
@@ -1606,9 +1623,6 @@
                 var topLeft  = (map.height * map.blockSize),
                     textBase = topLeft + 17;
                 
-                ctx.fillStyle = "#000000";
-                ctx.fillRect(0, topLeft, (map.width * map.blockSize), 30);
-                
                 ctx.fillStyle = "#FFFF00";
 
                 for (var i = 0, len = user.getLives(); i < len; i++) {
@@ -1698,6 +1712,9 @@
                 if (state !== PAUSE) { 
                     ++tick;
                 }
+
+                var topLeftLimpieza = (map.height * map.blockSize);
+                ctx.clearRect(0, topLeftLimpieza, (map.width * map.blockSize), 30);
 
                 map.drawPills(ctx);
 
