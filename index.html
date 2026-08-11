@@ -899,9 +899,22 @@
                 var imagenActual = bocaAbierta ? imagenAbierta : imagenCerrada;
 
                 if (imagenActual.complete && imagenActual.naturalWidth > 0) {
-                    var anchoImg = s * 1.0;
+                    var anchoImg = s * 1.4;
                     var altoImg  = anchoImg * (imagenActual.naturalHeight / imagenActual.naturalWidth);
-                    ctx.drawImage(imagenActual, cx - anchoImg / 2, cy - altoImg / 2, anchoImg, altoImg);
+
+                    ctx.save();
+                    ctx.translate(cx, cy);
+
+                    if (direction === RIGHT) {
+                        ctx.scale(-1, 1);
+                    } else if (direction === UP) {
+                        ctx.rotate(Math.PI / 2);
+                    } else if (direction === DOWN) {
+                        ctx.rotate(-Math.PI / 2);
+                    }
+
+                    ctx.drawImage(imagenActual, -anchoImg / 2, -altoImg / 2, anchoImg, altoImg);
+                    ctx.restore();
                     return;
                 }
 
@@ -1628,8 +1641,13 @@
             }
 
             function redrawBlock(pos) {
-                map.drawBlock(Math.floor(pos.y/10), Math.floor(pos.x/10), ctx);
-                map.drawBlock(Math.ceil(pos.y/10), Math.ceil(pos.x/10), ctx);
+                var filaBase = Math.floor(pos.y/10);
+                var colBase  = Math.floor(pos.x/10);
+                for (var df = -1; df <= 1; df++) {
+                    for (var dc = -1; dc <= 1; dc++) {
+                        map.drawBlock(filaBase + df, colBase + dc, ctx);
+                    }
+                }
             }
 
             function mainDraw() { 
