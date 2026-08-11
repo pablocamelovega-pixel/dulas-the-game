@@ -2,6 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dulas The Game</title>
     <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Permanent+Marker">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -10,16 +11,20 @@
     <style type="text/css">
         body {
             background-color: black;
-            width: 1050px;
+            width: 100%;
+            max-width: 1050px;
             margin: 0px auto;
             font-family: sans-serif;
+            box-sizing: border-box;
+            padding: 0 10px;
         }
 
         #pacman {
-            height: 470px;
-            width: 382px;
+            width: 100%;
+            max-width: 382px;
+            height: auto;
             border-radius: 5px;
-            margin: 20px 0;
+            margin: 20px auto;
         }
 
         #shim {
@@ -122,43 +127,18 @@
             cursor: pointer;
         }
 
-        #pantallaLogoIntro {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 30000;
-            transition: opacity 0.8s ease-out;
-            opacity: 1;
-        }
-
-        #pantallaLogoIntro.ocultando {
-            opacity: 0;
-        }
-
-        #contenedorLogoIntro {
-            position: relative;
-            display: inline-block;
-        }
-
         #logoIntro {
-            max-width: 65vw;
+            max-width: 500px;
             display: block;
+            margin: 0 auto 10px auto;
             opacity: 0;
-            transition: opacity 1.2s ease-in;
+            transition: opacity 1s ease-in;
+            position: relative;
+            z-index: 2;
         }
 
         #logoIntro.mostrar {
             opacity: 1;
-        }
-
-        #contenedorLogoIntro {
-            position: relative;
-            display: inline-block;
-            overflow: hidden;
         }
 
         #pantallaInicioSNES::before {
@@ -330,6 +310,7 @@
 
         <div id="panelBogota" style="
             width:280px;
+            max-width:90vw;
             max-height:520px;
             overflow-y:auto;
             color:white;
@@ -343,12 +324,6 @@
         <div id="botonClickInicial">🔊 TOCA PARA COMENZAR 🔊</div>
     </div>
 
-    <div id="pantallaLogoIntro">
-        <div id="contenedorLogoIntro">
-            <img id="logoIntro" src="assets/logo-salud-total.png" alt="Salud Total EPS-S">
-        </div>
-    </div>
-
     <audio id="audioIntro" src="assets/audio-intro.mp3" preload="auto"></audio>
 
         <div id="pantallaInicioSNES">
@@ -359,6 +334,7 @@
         <img id="bacteriaIntro" src="assets/bacteria.png" alt="">
         <div id="destelloSNES"></div>
 
+        <img id="logoIntro" src="assets/logo-salud-total.png" alt="Salud Total EPS-S">
         <p id="subtituloSNES">LOS PLANES COMPLEMENTARIOS PRESENTAN</p>
         <h1 id="tituloSNES">DULAS<br>THE GAME</h1>
         <p id="startSNES">👻 PULSA ENTER PARA EMPEZAR 👻</p>
@@ -373,6 +349,7 @@
 
         <div id="panelSucursales" style="
             width:280px;
+            max-width:90vw;
             max-height:520px;
             overflow-y:auto;
             color:white;
@@ -662,9 +639,11 @@
                 lives     = null,
                 score     = 5,
                 keyMap    = {},
-                imagenPersonaje = new Image();
+                imagenCerrada = new Image(),
+                imagenAbierta = new Image();
 
-            imagenPersonaje.src = "assets/perrito-dulas.png";
+            imagenCerrada.src = "assets/perrito-dulas-cerrado.png";
+            imagenAbierta.src = "assets/perrito-dulas-abierto.png";
             
             keyMap[KEY.ARROW_LEFT]  = LEFT;
             keyMap[KEY.ARROW_UP]    = UP;
@@ -889,13 +868,13 @@
                     return;
                 }
 
-                if (imagenPersonaje.complete && imagenPersonaje.naturalWidth > 0) {
+                if (imagenCerrada.complete && imagenCerrada.naturalWidth > 0) {
                     var anchoImg = size * 1.0
                      * (1 - amount);
-                    var altoImg  = anchoImg * (imagenPersonaje.naturalHeight / imagenPersonaje.naturalWidth);
+                    var altoImg  = anchoImg * (imagenCerrada.naturalHeight / imagenCerrada.naturalWidth);
                     ctx.save();
                     ctx.globalAlpha = 1 - amount;
-                    ctx.drawImage(imagenPersonaje, cx - anchoImg / 2, cy - altoImg / 2, anchoImg, altoImg);
+                    ctx.drawImage(imagenCerrada, cx - anchoImg / 2, cy - altoImg / 2, anchoImg, altoImg);
                     ctx.restore();
                     return;
                 }
@@ -915,10 +894,14 @@
                     cx    = ((position.x/10) * s) + s / 2,
                     cy    = ((position.y/10) * s) + s / 2;
 
-                if (imagenPersonaje.complete && imagenPersonaje.naturalWidth > 0) {
+                var bocaAbierta = (position.x % 10 > 2 && position.x % 10 < 8) ||
+                                   (position.y % 10 > 2 && position.y % 10 < 8);
+                var imagenActual = bocaAbierta ? imagenAbierta : imagenCerrada;
+
+                if (imagenActual.complete && imagenActual.naturalWidth > 0) {
                     var anchoImg = s * 1.0;
-                    var altoImg  = anchoImg * (imagenPersonaje.naturalHeight / imagenPersonaje.naturalWidth);
-                    ctx.drawImage(imagenPersonaje, cx - anchoImg / 2, cy - altoImg / 2, anchoImg, altoImg);
+                    var altoImg  = anchoImg * (imagenActual.naturalHeight / imagenActual.naturalWidth);
+                    ctx.drawImage(imagenActual, cx - anchoImg / 2, cy - altoImg / 2, anchoImg, altoImg);
                     return;
                 }
 
@@ -950,7 +933,7 @@
                 "newLevel"      : newLevel,
                 "keyDown"       : keyDown
             };
-        };
+       };
 
        Pacman.Map = function (size) {
             var height    = null, 
@@ -1915,6 +1898,7 @@
 
                     setTimeout(function () {
                         titulo.classList.add("posicionado");
+                        document.getElementById("logoIntro").classList.add("mostrar");
                     }, 1900);
 
                     setTimeout(function () {
@@ -1930,47 +1914,26 @@
                 }
 
                 function reproducirIntroCompleta() {
-                    var pantallaLogo = document.getElementById("pantallaLogoIntro");
-                    var logo = document.getElementById("logoIntro");
+                    mostrarPantallaStart();
+
                     var audio = document.getElementById("audioIntro");
-                    var yaContinuo = false;
-
-                    function pasarAPantallaStart() {
-                        if (yaContinuo) { return; }
-                        yaContinuo = true;
-
-                        mostrarPantallaStart();
-                        pantallaLogo.classList.add("ocultando");
-
-                        setTimeout(function () {
-                            pantallaLogo.style.display = "none";
-                        }, 800);
-                    }
-
                     setTimeout(function () {
-                        logo.classList.add("mostrar");
-
-                        setTimeout(function () {
-                            var promesaAudio = audio.play();
-                            if (promesaAudio && promesaAudio.catch) {
-                                promesaAudio.catch(function () {
-                                    // El navegador bloqueó el audio automático: seguimos igual, sin quedarnos pegados
-                                    setTimeout(pasarAPantallaStart, 2500);
-                                });
-                            }
-                        }, 1200);
-                    }, 400);
-
-                    audio.addEventListener("ended", pasarAPantallaStart);
+                        var promesaAudio = audio.play();
+                        if (promesaAudio && promesaAudio.catch) {
+                            promesaAudio.catch(function () {
+                                console.log("El navegador bloqueó el audio automático.");
+                            });
+                        }
+                    }, 1900);
                 }
 
                 document.getElementById("botonClickInicial").addEventListener("click", function () {
                     var pantallaClick = document.getElementById("pantallaClickInicial");
+                    reproducirIntroCompleta();
                     pantallaClick.classList.add("ocultando");
 
                     setTimeout(function () {
                         pantallaClick.style.display = "none";
-                        reproducirIntroCompleta();
                     }, 500);
                 });
 
@@ -1983,6 +1946,8 @@
 
                 document.getElementById("jugarDeNuevo").addEventListener("click", function () {
                     document.getElementById("gameOverModal").style.display = "none";
+                    document.getElementById("mensajeGuardado").style.display = "none";
+                    document.getElementById("tipoParticipacionContainer").style.display = "block";
                     startNewGame();
                 });
 
@@ -2052,9 +2017,7 @@
 
                     try {
                         await window.guardarPuntaje(nombre, sucursal, tipoParticipacion, equipo, puntaje, registroTrivia);
-                        alert("¡Puntaje guardado con éxito!");
-                        
-                        document.getElementById("gameOverModal").style.display = "none";
+
                         document.getElementById("nombreJugador").value = "";
                         document.getElementById("sucursalJugador").selectedIndex = 0;
                         document.getElementById("participacionIndividual").checked = false;
@@ -2062,6 +2025,8 @@
                         document.getElementById("equipoJugador").value = "";
                         document.getElementById("equipoJugador").style.display = "none";
                         document.getElementById("camposFormularioPuntaje").style.display = "none";
+                        document.getElementById("tipoParticipacionContainer").style.display = "none";
+                        document.getElementById("mensajeGuardado").style.display = "block";
                         
                     } catch (error) {
                         alert("Hubo un error al guardar el puntaje. Intenta de nuevo.");
@@ -2640,8 +2605,9 @@ Pacman.MAP_NIVEL_2_3 = [
             <h2 style="color:yellow;margin-top:0;">🏆 GAME OVER</h2>
             <p>Tu puntaje fue:</p>
             <h1 id="finalScore" style="color:#00ff66;">0</h1>
+            <p id="mensajeGuardado" style="display:none;color:#4CAF50;font-weight:bold;">✅ ¡Puntaje guardado con éxito!</p>
 
-           <div style="text-align:center;margin:10px 2px;color:white;font-family:Arial;">
+           <div id="tipoParticipacionContainer" style="text-align:center;margin:10px 2px;color:white;font-family:Arial;">
                 <p style="margin:5px 0;">Tipo de participación:</p>
                 <label style="margin-right:20px;">
                     <input type="radio" name="tipoParticipacion" id="participacionIndividual" value="Individual">
@@ -2652,11 +2618,6 @@ Pacman.MAP_NIVEL_2_3 = [
                     Grupal
                 </label>
             </div>
-
-            <input id="equipoJugador"
-                   type="text"
-                   placeholder="Nombre del equipo (ej. LOS BIGOTES)"
-                   style="width:95%;padding:10px;margin:8px 0;display:none;">
 
             <div id="camposFormularioPuntaje" style="display:none;">
                 <input id="equipoJugador"
