@@ -1815,9 +1815,17 @@
                     imagen: "assets/rescate-nivel1.png",
                     titulo: "¡Rescataste a tu primer amigo!",
                     texto: "Dulas sigue su camino para salvar al resto de sus amigos de los fantasmas."
+                },
+                2: {
+                    imagen: "assets/rescate-nivel2.png",
+                    titulo: "¡Rescataste a otro amigo!",
+                    texto: "Cada vez quedan menos fantasmas entre Dulas y sus amigos."
+                },
+                3: {
+                    imagen: "assets/rescate-nivel3.png",
+                    titulo: "¡Rescataste al último amigo!",
+                    texto: "Dulas por fin reunió a todos sus amigos, lejos de los fantasmas."
                 }
-                // Cuando tengas la imagen del nivel 2, agrégala aquí igual:
-                // 2: { imagen: "assets/rescate-nivel2.png", titulo: "...", texto: "..." }
             };
 
             function avanzarSiguienteNivel() {
@@ -1829,21 +1837,19 @@
 
             function completedLevel() {
                 var nivelCompletado = level;
-
-                if (level >= 3) {
-                    setState(WAITING);
-                    document.getElementById("victoriaModal").style.display = "flex";
-                    return;
-                }
-
                 setState(WAITING);
 
+                var esUltimoNivel = (nivelCompletado >= 3);
                 var datosIlustracion = ilustracionesPorNivel[nivelCompletado];
+
                 if (datosIlustracion) {
                     document.getElementById("ilustracionImagen").src = datosIlustracion.imagen;
                     document.getElementById("ilustracionTitulo").innerText = datosIlustracion.titulo;
                     document.getElementById("ilustracionTexto").innerText = datosIlustracion.texto;
+                    document.getElementById("ilustracionModal").dataset.esFinal = esUltimoNivel ? "true" : "false";
                     document.getElementById("ilustracionModal").style.display = "flex";
+                } else if (esUltimoNivel) {
+                    document.getElementById("victoriaModal").style.display = "flex";
                 } else {
                     avanzarSiguienteNivel();
                 }
@@ -2046,8 +2052,14 @@
                 });
 
                 document.getElementById("btnContinuarIlustracion").addEventListener("click", function () {
+                    var esFinal = document.getElementById("ilustracionModal").dataset.esFinal === "true";
                     document.getElementById("ilustracionModal").style.display = "none";
-                    avanzarSiguienteNivel();
+
+                    if (esFinal) {
+                        document.getElementById("victoriaModal").style.display = "flex";
+                    } else {
+                        avanzarSiguienteNivel();
+                    }
                 });
 
                 document.getElementById("btnContinuarVictoria").addEventListener("click", function () {
