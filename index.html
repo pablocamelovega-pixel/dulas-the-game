@@ -1144,6 +1144,7 @@
             
            return {
                 "draw"                : draw,
+                "drawWall"            : drawWall,
                 "drawBlock"           : drawBlock,
                 "drawPills"           : drawPills,
                 "block"               : block,
@@ -1657,11 +1658,27 @@
             function redrawBlock(pos) {
                 var filaBase = Math.floor(pos.y/10);
                 var colBase  = Math.floor(pos.x/10);
-                for (var df = -1; df <= 1; df++) {
-                    for (var dc = -1; dc <= 1; dc++) {
-                        map.drawBlock(filaBase + df, colBase + dc, ctx);
+
+                var filaInicio = Math.max(0, filaBase - 2);
+                var filaFin    = Math.min(map.height - 1, filaBase + 2);
+                var colInicio  = Math.max(0, colBase - 2);
+                var colFin     = Math.min(map.width - 1, colBase + 2);
+
+                var s = map.blockSize;
+                ctx.clearRect(
+                    colInicio * s,
+                    filaInicio * s,
+                    (colFin - colInicio + 1) * s,
+                    (filaFin - filaInicio + 1) * s
+                );
+
+                for (var fila = filaInicio; fila <= filaFin; fila++) {
+                    for (var col = colInicio; col <= colFin; col++) {
+                        map.drawBlock(fila, col, ctx);
                     }
                 }
+
+                map.drawWall(ctx);
             }
 
             function mainDraw() { 
