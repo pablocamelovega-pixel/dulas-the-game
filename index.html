@@ -1353,6 +1353,16 @@
         return true;
     }
 
+    var victoria = document.getElementById("victoriaModal");
+    if (victoria && victoria.style.display === "flex") {
+        return true;
+    }
+
+    var ilustracion = document.getElementById("ilustracionModal");
+    if (ilustracion && ilustracion.style.display === "flex") {
+        return true;
+    }
+
     var inicioSNES = document.getElementById("pantallaInicioSNES");
     if (inicioSNES && inicioSNES.style.display !== "none") {
         return true;
@@ -1519,7 +1529,7 @@
 
                 document.getElementById("btnRechazarTrivia").onclick = function() {
                     document.getElementById("ofertaTriviaModal").style.display = "none";
-                    mostrarFormularioGuardado(puntajeFinal);
+                    mostrarFormularioGuardado(puntajeFinal, true);
                 };
             }
 
@@ -1544,7 +1554,7 @@
                             registroTrivia.push({ tipo: "puntos", pregunta: preguntaActual.pregunta, resultado: "sinTiempo" });
                             var puntajePenalizado = Math.floor(puntajeFinal / 2);
                             alert("¡Se acabó el tiempo! Tu puntaje se redujo a la mitad: " + puntajePenalizado);
-                            mostrarFormularioGuardado(puntajePenalizado);
+                            mostrarFormularioGuardado(puntajePenalizado, true);
                         }
                     }
                 }, 1000);
@@ -1564,6 +1574,8 @@
                         registroTrivia.push({ tipo: "puntos", pregunta: preguntaActual.pregunta, resultado: "incorrecta" });
                         puntajeDefinitivo = Math.floor(puntajeFinal / 2);
                         alert("Respuesta incorrecta. Tu puntaje se redujo a la mitad: " + puntajeDefinitivo);
+                        mostrarFormularioGuardado(puntajeDefinitivo, true);
+                        return;
                     }
 
                     mostrarFormularioGuardado(puntajeDefinitivo);
@@ -1573,9 +1585,20 @@
                 document.getElementById("btnFalso").onclick = function() { responder(false); };
             }
 
-            function mostrarFormularioGuardado(puntajeFinal) {
+            function mostrarFormularioGuardado(puntajeFinal, perdioMultiplicador) {
                 document.getElementById("finalScore").innerText = puntajeFinal;
                 document.getElementById("gameOverModal").dataset.puntaje = puntajeFinal;
+
+                var imagenDerrota = document.getElementById("imagenDerrotaMultiplicador");
+                var textoDerrota = document.getElementById("textoDerrotaMultiplicador");
+
+                if (perdioMultiplicador) {
+                    imagenDerrota.style.display = "block";
+                    textoDerrota.style.display = "block";
+                } else {
+                    imagenDerrota.style.display = "none";
+                    textoDerrota.style.display = "none";
+                }
 
                 if (puntajeFinal >= 28000) {
                     document.getElementById("premioModal").style.display = "flex";
@@ -1787,17 +1810,43 @@
                 }        
             };
             
-            function completedLevel() {
-                if (level >= 3) {
-                    setState(WAITING);
-                    mostrarFormularioFinal();
-                    return;
+            var ilustracionesPorNivel = {
+                1: {
+                    imagen: "assets/rescate-nivel1.png",
+                    titulo: "¡Rescataste a tu primer amigo!",
+                    texto: "Dulas sigue su camino para salvar al resto de sus amigos de los fantasmas."
                 }
-                setState(WAITING);
+                // Cuando tengas la imagen del nivel 2, agrégala aquí igual:
+                // 2: { imagen: "assets/rescate-nivel2.png", titulo: "...", texto: "..." }
+            };
+
+            function avanzarSiguienteNivel() {
                 level += 1;
                 map.reset(level);
                 user.newLevel();
                 startLevel();
+            }
+
+            function completedLevel() {
+                var nivelCompletado = level;
+
+                if (level >= 3) {
+                    setState(WAITING);
+                    document.getElementById("victoriaModal").style.display = "flex";
+                    return;
+                }
+
+                setState(WAITING);
+
+                var datosIlustracion = ilustracionesPorNivel[nivelCompletado];
+                if (datosIlustracion) {
+                    document.getElementById("ilustracionImagen").src = datosIlustracion.imagen;
+                    document.getElementById("ilustracionTitulo").innerText = datosIlustracion.titulo;
+                    document.getElementById("ilustracionTexto").innerText = datosIlustracion.texto;
+                    document.getElementById("ilustracionModal").style.display = "flex";
+                } else {
+                    avanzarSiguienteNivel();
+                }
             };
 
             function keyPress(e) { 
@@ -1994,6 +2043,16 @@
                     if (pantalla.style.display !== "none" && animacionSNESLista && e.keyCode === 13) {
                         iniciarDesdePantallaSNES();
                     }
+                });
+
+                document.getElementById("btnContinuarIlustracion").addEventListener("click", function () {
+                    document.getElementById("ilustracionModal").style.display = "none";
+                    avanzarSiguienteNivel();
+                });
+
+                document.getElementById("btnContinuarVictoria").addEventListener("click", function () {
+                    document.getElementById("victoriaModal").style.display = "none";
+                    mostrarFormularioFinal();
                 });
 
                 document.getElementById("jugarDeNuevo").addEventListener("click", function () {
@@ -2437,6 +2496,72 @@ Pacman.MAP_NIVEL_2_3 = [
         });
     </script>
 
+<div id="ilustracionModal" style="
+    display:none;
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,.9);
+    justify-content:center;
+    align-items:center;
+    z-index:10000;
+">
+    <div style="
+        background:#111;
+        border:3px solid #ffd700;
+        border-radius:12px;
+        padding:20px;
+        max-width:90vw;
+        color:white;
+        font-family:Arial;
+        text-align:center;
+    ">
+        <h2 id="ilustracionTitulo" style="color:#ffd700;margin-top:0;"></h2>
+        <img id="ilustracionImagen" src="" alt="" style="max-width:100%;max-height:60vh;border-radius:8px;display:block;margin:0 auto;">
+        <p id="ilustracionTexto" style="margin-top:10px;"></p>
+
+        <button id="btnContinuarIlustracion" style="
+            margin-top:15px;padding:12px 25px;background:#ffd700;
+            border:none;border-radius:8px;font-weight:bold;
+            cursor:pointer;color:#111;">Continuar</button>
+    </div>
+</div>
+
+<div id="victoriaModal" style="
+    display:none;
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,.85);
+    justify-content:center;
+    align-items:center;
+    z-index:10000;
+">
+    <div style="
+        background:#111;
+        border:3px solid #00ff66;
+        border-radius:12px;
+        padding:25px;
+        width:350px;
+        color:white;
+        font-family:Arial;
+        text-align:center;
+    ">
+        <h2 style="color:#00ff66;margin-top:0;">🎉 ¡Felicidades! 🎉</h2>
+        <p>Completaste los <strong>3 niveles</strong> de Dulas The Game.</p>
+        <p style="color:#ffd700;">¡Eres todo un experto en los Planes Complementarios!</p>
+
+        <button id="btnContinuarVictoria" style="
+            margin-top:15px;padding:12px 25px;background:#00ff66;
+            border:none;border-radius:8px;font-weight:bold;
+            cursor:pointer;color:#111;">Continuar</button>
+    </div>
+</div>
+
 <div id="ofertaTriviaModal" style="
     display:none;
     position:fixed;
@@ -2655,6 +2780,16 @@ Pacman.MAP_NIVEL_2_3 = [
             text-align:center;
         ">
             <h2 style="color:yellow;margin-top:0;">🏆 GAME OVER</h2>
+
+            <img id="imagenDerrotaMultiplicador"
+                 src="assets/derrota-multiplicador.png"
+                 alt=""
+                 style="display:none;max-width:100%;max-height:180px;border-radius:8px;margin:0 auto 8px auto;"
+                 onerror="this.style.display='none';">
+            <p id="textoDerrotaMultiplicador" style="display:none;color:#ff8888;">
+                Los fantasmas alcanzaron a tu amigo... ¡Inténtalo de nuevo!
+            </p>
+
             <p>Tu puntaje fue:</p>
             <h1 id="finalScore" style="color:#00ff66;">0</h1>
             <p id="mensajeGuardado" style="display:none;color:#4CAF50;font-weight:bold;">✅ ¡Puntaje guardado con éxito!</p>
