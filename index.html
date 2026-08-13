@@ -1246,6 +1246,7 @@
                 tick         = 0,
                 registroTrivia = [],
                 vidaExtraOfrecida = false,
+                juegoCompletado = false,
                 ghostPos, userPos, 
                 stateChanged = true,
                 timerStart   = null,
@@ -1312,6 +1313,7 @@
                 setState(WAITING);
                 registroTrivia = [];
                 vidaExtraOfrecida = false;
+                juegoCompletado = false;
                 level = 1;
                 user.reset();
                 map.reset(level);
@@ -1360,6 +1362,11 @@
 
     var ilustracion = document.getElementById("ilustracionModal");
     if (ilustracion && ilustracion.style.display === "flex") {
+        return true;
+    }
+
+    var celebracion = document.getElementById("celebracionModal");
+    if (celebracion && celebracion.style.display === "flex") {
         return true;
     }
 
@@ -1592,7 +1599,7 @@
                 var imagenDerrota = document.getElementById("imagenDerrotaMultiplicador");
                 var textoDerrota = document.getElementById("textoDerrotaMultiplicador");
 
-                if (perdioMultiplicador) {
+                if (perdioMultiplicador && !juegoCompletado) {
                     imagenDerrota.style.display = "block";
                     textoDerrota.style.display = "block";
                 } else {
@@ -1842,6 +1849,10 @@
                 var esUltimoNivel = (nivelCompletado >= 3);
                 var datosIlustracion = ilustracionesPorNivel[nivelCompletado];
 
+                if (esUltimoNivel) {
+                    juegoCompletado = true;
+                }
+
                 if (datosIlustracion) {
                     document.getElementById("ilustracionImagen").src = datosIlustracion.imagen;
                     document.getElementById("ilustracionTitulo").innerText = datosIlustracion.titulo;
@@ -2064,6 +2075,12 @@
 
                 document.getElementById("btnContinuarVictoria").addEventListener("click", function () {
                     document.getElementById("victoriaModal").style.display = "none";
+                    user.addScore(5000);
+                    document.getElementById("celebracionModal").style.display = "flex";
+                });
+
+                document.getElementById("btnContinuarCelebracion").addEventListener("click", function () {
+                    document.getElementById("celebracionModal").style.display = "none";
                     mostrarFormularioFinal();
                 });
 
@@ -2541,6 +2558,43 @@ Pacman.MAP_NIVEL_2_3 = [
     </div>
 </div>
 
+<div id="celebracionModal" style="
+    display:none;
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,.9);
+    justify-content:center;
+    align-items:center;
+    z-index:10000;
+">
+    <div style="
+        background:#111;
+        border:3px solid #ffd700;
+        border-radius:12px;
+        padding:20px;
+        max-width:90vw;
+        color:white;
+        font-family:Arial;
+        text-align:center;
+    ">
+        <h2 style="color:#ffd700;margin-top:0;">🎉 ¡Todos a salvo! 🎉</h2>
+        <img id="celebracionImagen"
+             src="assets/celebracion-final.png"
+             alt=""
+             style="max-width:100%;max-height:60vh;border-radius:8px;display:block;margin:0 auto;"
+             onerror="this.style.display='none';">
+        <p style="margin-top:10px;">Dulas y todos sus amigos están juntos de nuevo. ¡Ganaste 5.000 puntos extra por completar tu misión!</p>
+
+        <button id="btnContinuarCelebracion" style="
+            margin-top:15px;padding:12px 25px;background:#ffd700;
+            border:none;border-radius:8px;font-weight:bold;
+            cursor:pointer;color:#111;">Continuar</button>
+    </div>
+</div>
+
 <div id="victoriaModal" style="
     display:none;
     position:fixed;
@@ -2780,17 +2834,28 @@ Pacman.MAP_NIVEL_2_3 = [
         justify-content:center;
         align-items:center;
         z-index:9999;
+        padding:15px;
+        box-sizing:border-box;
     ">
         <div style="
             background:#111;
             border:3px solid yellow;
             border-radius:12px;
             padding:25px;
-            width:350px;
+            max-width:650px;
+            width:100%;
+            max-height:90vh;
+            overflow-y:auto;
             color:white;
             font-family:Arial;
             text-align:center;
+            display:flex;
+            flex-wrap:wrap;
+            gap:25px;
+            justify-content:center;
+            box-sizing:border-box;
         ">
+        <div style="flex:1;min-width:230px;">
             <h2 style="color:yellow;margin-top:0;">🏆 GAME OVER</h2>
 
             <img id="imagenDerrotaMultiplicador"
@@ -2805,7 +2870,9 @@ Pacman.MAP_NIVEL_2_3 = [
             <p>Tu puntaje fue:</p>
             <h1 id="finalScore" style="color:#00ff66;">0</h1>
             <p id="mensajeGuardado" style="display:none;color:#4CAF50;font-weight:bold;">✅ ¡Puntaje guardado con éxito!</p>
+        </div>
 
+        <div style="flex:1;min-width:230px;">
            <div id="tipoParticipacionContainer" style="text-align:center;margin:10px 2px;color:white;font-family:Arial;">
                 <p style="margin:5px 0;">Tipo de participación:</p>
                 <label style="margin-right:20px;">
@@ -2880,6 +2947,7 @@ Pacman.MAP_NIVEL_2_3 = [
                     ">
                 Jugar de nuevo
             </button>
+        </div>
         </div>
     </div>
 
