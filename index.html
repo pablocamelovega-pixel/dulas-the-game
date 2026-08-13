@@ -1536,7 +1536,7 @@
 
                 document.getElementById("btnRechazarTrivia").onclick = function() {
                     document.getElementById("ofertaTriviaModal").style.display = "none";
-                    mostrarFormularioGuardado(puntajeFinal, true);
+                    mostrarFormularioGuardado(puntajeFinal);
                 };
             }
 
@@ -1561,7 +1561,7 @@
                             registroTrivia.push({ tipo: "puntos", pregunta: preguntaActual.pregunta, resultado: "sinTiempo" });
                             var puntajePenalizado = Math.floor(puntajeFinal / 2);
                             alert("¡Se acabó el tiempo! Tu puntaje se redujo a la mitad: " + puntajePenalizado);
-                            mostrarFormularioGuardado(puntajePenalizado, true);
+                            mostrarFormularioGuardado(puntajePenalizado);
                         }
                     }
                 }, 1000);
@@ -1581,8 +1581,6 @@
                         registroTrivia.push({ tipo: "puntos", pregunta: preguntaActual.pregunta, resultado: "incorrecta" });
                         puntajeDefinitivo = Math.floor(puntajeFinal / 2);
                         alert("Respuesta incorrecta. Tu puntaje se redujo a la mitad: " + puntajeDefinitivo);
-                        mostrarFormularioGuardado(puntajeDefinitivo, true);
-                        return;
                     }
 
                     mostrarFormularioGuardado(puntajeDefinitivo);
@@ -1592,14 +1590,14 @@
                 document.getElementById("btnFalso").onclick = function() { responder(false); };
             }
 
-            function mostrarFormularioGuardado(puntajeFinal, perdioMultiplicador) {
+            function mostrarFormularioGuardado(puntajeFinal) {
                 document.getElementById("finalScore").innerText = puntajeFinal;
                 document.getElementById("gameOverModal").dataset.puntaje = puntajeFinal;
 
                 var imagenDerrota = document.getElementById("imagenDerrotaMultiplicador");
                 var textoDerrota = document.getElementById("textoDerrotaMultiplicador");
 
-                if (perdioMultiplicador && !juegoCompletado) {
+                if (!juegoCompletado) {
                     imagenDerrota.style.display = "block";
                     textoDerrota.style.display = "block";
                 } else {
