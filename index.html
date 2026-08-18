@@ -982,7 +982,7 @@
             };
        };
 
-       Pacman.Map = function (size) {
+              Pacman.Map = function (size) {
             var height    = null, 
                 width     = null, 
                 blockSize = size,
@@ -990,7 +990,9 @@
                 map       = null,
                 esMapaSimple = false,
                 murosActuales = Pacman.WALLS,
-                totalComestibles = 0;
+                totalComestibles = 0,
+                canvasFondo = document.createElement("canvas"),
+                ctxFondo    = canvasFondo.getContext("2d");
             
             function withinBounds(y, x) {
                 return y >= 0 && y < height && x >= 0 && x < width;
@@ -1075,6 +1077,11 @@
                         }
                     }
                 }
+
+                canvasFondo.width  = width * blockSize;
+                canvasFondo.height = height * blockSize;
+                ctxFondo.clearRect(0, 0, canvasFondo.width, canvasFondo.height);
+                drawWall(ctxFondo);
             };
 
             function getTotalComestibles() {
@@ -1154,11 +1161,16 @@
                 ctx.closePath();     
             };
 
+             function dibujarMurosDesdeCache(destCtx, sx, sy, sw, sh) {
+                destCtx.drawImage(canvasFondo, sx, sy, sw, sh, sx, sy, sw, sh);
+            }
+
             reset();
             
            return {
                 "draw"                : draw,
                 "drawWall"            : drawWall,
+                "drawWallsCached"     : dibujarMurosDesdeCache,
                 "drawBlock"           : drawBlock,
                 "drawPills"           : drawPills,
                 "block"               : block,
@@ -1700,7 +1712,7 @@
                 ctx.fillText("Level: " + level, 260, textBase);
             }
 
-            function redrawBlock(pos) {
+             function redrawBlock(pos) {
                 var filaBase = Math.floor(pos.y/10);
                 var colBase  = Math.floor(pos.x/10);
 
@@ -1710,12 +1722,12 @@
                 var colFin     = Math.min(map.width - 1, colBase + 2);
 
                 var s = map.blockSize;
-                ctx.clearRect(
-                    colInicio * s,
-                    filaInicio * s,
-                    (colFin - colInicio + 1) * s,
-                    (filaFin - filaInicio + 1) * s
-                );
+                var zonaX = colInicio * s;
+                var zonaY = filaInicio * s;
+                var zonaAncho = (colFin - colInicio + 1) * s;
+                var zonaAlto  = (filaFin - filaInicio + 1) * s;
+
+                ctx.clearRect(zonaX, zonaY, zonaAncho, zonaAlto);
 
                 for (var fila = filaInicio; fila <= filaFin; fila++) {
                     for (var col = colInicio; col <= colFin; col++) {
@@ -1723,7 +1735,7 @@
                     }
                 }
 
-                map.drawWall(ctx);
+                map.drawWallsCached(ctx, zonaX, zonaY, zonaAncho, zonaAlto);
             }
 
             function mainDraw() { 
