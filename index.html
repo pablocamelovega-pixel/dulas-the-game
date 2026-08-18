@@ -308,7 +308,14 @@
 </head>
 <body>
     <div id="shim">shim for font face</div>
-    <h1 id="tituloJuego">DULAS - THE GAME</h1>
+    <h1 id="tituloJuego">
+        <img id="tituloJuegoImagen"
+             src="assets/titulo-dulas.png"
+             alt="DULAS - THE GAME"
+             style="max-width:100%;max-height:100px;display:block;margin:0 auto;"
+             onerror="this.style.display='none'; document.getElementById('tituloJuegoTexto').style.display='block';">
+        <span id="tituloJuegoTexto" style="display:none;">DULAS - THE GAME</span>
+    </h1>
     <p style="text-align:center;">Ayuda a DULAS a recorrer el laberinto, recoge todos los puntos y evita a los enemigos para conseguir la mayor puntuación posible.</p>
     
 <div id="cajaHighScore" style="
@@ -356,7 +363,14 @@
 
         <img id="logoIntro" src="assets/logo-salud-total.png" alt="Salud Total EPS-S">
         <p id="subtituloSNES">LOS PLANES COMPLEMENTARIOS PRESENTAN</p>
-        <h1 id="tituloSNES">DULAS<br>THE GAME</h1>
+        <h1 id="tituloSNES">
+            <img id="tituloSNESImagen"
+                 src="assets/titulo-dulas.png"
+                 alt="DULAS THE GAME"
+                 style="max-width:100%;max-height:120px;display:block;margin:0 auto;"
+                 onerror="this.style.display='none'; document.getElementById('tituloSNESTexto').style.display='block';">
+            <span id="tituloSNESTexto" style="display:none;">DULAS<br>THE GAME</span>
+        </h1>
         <p id="startSNES">👻 PULSA ENTER PARA EMPEZAR 👻</p>
 
         <div id="footerSNES">
@@ -1984,6 +1998,7 @@
 
                     setTimeout(function () {
                         pantalla.style.display = "none";
+                        document.body.style.overflow = "";
                         startNewGame();
                     }, 600);
                 }
@@ -1992,6 +2007,7 @@
 
                 function mostrarPantallaStart() {
                     document.getElementById("pantallaInicioSNES").style.display = "flex";
+                    document.body.style.overflow = "hidden";
                     iniciarAnimacionEntradaSNES();
                 }
 
