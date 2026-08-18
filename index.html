@@ -1272,7 +1272,9 @@
                 stored       = null,
                 imagenVida   = new Image();
 
-            imagenVida.src = "assets/perrito-dulas.png";
+                        imagenVida.src = "assets/perrito-dulas.png";
+
+                       
 
             function getTick() { 
                 return tick;
@@ -1323,7 +1325,7 @@
                 setState(COUNTDOWN);
             }    
 
-           function startNewGame() {
+            function startNewGame() {
                 setState(WAITING);
                 registroTrivia = [];
                 vidaExtraOfrecida = false;
@@ -1333,6 +1335,7 @@
                 map.reset(level);
                 map.draw(ctx);
                 startLevel();
+                actualizarAmigosJaula();
             }
 
             function keyDown(e) {
@@ -1812,7 +1815,7 @@
                     }
                 } 
 
-                drawFooter();
+                drawFooter();   
             }
 
             function eatenPill(esPildoraDeVelocidad) {
@@ -1847,11 +1850,20 @@
                 }
             };
 
+            function actualizarAmigosJaula() {
+                for (var n = 1; n <= 3; n++) {
+                    if (imagenesAmigosJaulaDOM[n]) {
+                        imagenesAmigosJaulaDOM[n].style.display = (level > n) ? "none" : "block";
+                    }
+                }
+            }
+
             function avanzarSiguienteNivel() {
                 level += 1;
                 map.reset(level);
                 user.newLevel();
                 startLevel();
+                actualizarAmigosJaula();
             }
 
             function completedLevel() {
@@ -1885,6 +1897,8 @@
                 }
             };
             
+            var imagenesAmigosJaulaDOM = {};
+
             function init(wrapper, root) {
                 var i, len, ghost,
                     blockSize = wrapper.offsetWidth / 19,
@@ -1893,7 +1907,30 @@
                 canvas.setAttribute("width", (blockSize * 19) + "px");
                 canvas.setAttribute("height", (blockSize * 22) + 30 + "px");
 
+                wrapper.style.position = "relative";
                 wrapper.appendChild(canvas);
+
+                var posicionesJaula = {
+                    1: { x: 80,  y: 100 },
+                    2: { x: 90,  y: 100 },
+                    3: { x: 100, y: 100 }
+                };
+
+                for (var numAmigo = 1; numAmigo <= 3; numAmigo++) {
+                    var imgAmigo = document.createElement("img");
+                    imgAmigo.src = "assets/amigo-jaula-nivel" + numAmigo + ".gif";
+                    imgAmigo.onerror = function () { this.style.display = "none"; };
+                    imgAmigo.style.position = "absolute";
+                    imgAmigo.style.pointerEvents = "none";
+                    imgAmigo.style.width = (blockSize * 1.3) + "px";
+                    imgAmigo.style.left = (((posicionesJaula[numAmigo].x / 10) * blockSize) + (blockSize / 2)) + "px";
+                    imgAmigo.style.top  = (((posicionesJaula[numAmigo].y / 10) * blockSize) + (blockSize / 2)) + "px";
+                    imgAmigo.style.transform = "translate(-50%, -50%)";
+                    imgAmigo.style.zIndex = "5";
+
+                    wrapper.appendChild(imgAmigo);
+                    imagenesAmigosJaulaDOM[numAmigo] = imgAmigo;
+                }
 
                 ctx  = canvas.getContext('2d');
 
