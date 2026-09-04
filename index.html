@@ -1904,6 +1904,35 @@
                 }
             }
 
+                        function obtenerHoraBogota() {
+                var ahora = new Date();
+                var opciones = { timeZone: "America/Bogota", hour12: false, weekday: "short", hour: "2-digit", minute: "2-digit" };
+                var partes = new Intl.DateTimeFormat("en-US", opciones).formatToParts(ahora);
+                var mapa = {};
+                partes.forEach(function (p) { mapa[p.type] = p.value; });
+                return { diaSemana: mapa.weekday, hora: parseInt(mapa.hour, 10), minuto: parseInt(mapa.minute, 10) };
+            }
+
+            function esHorarioPermitido() {
+                var info = obtenerHoraBogota();
+
+                if (info.diaSemana === "Sat" || info.diaSemana === "Sun") {
+                    return true;
+                }
+
+                var minutosDelDia = (info.hora * 60) + info.minuto;
+                var enHorarioAlmuerzo = minutosDelDia >= (12 * 60) && minutosDelDia < (14 * 60);
+                var fueraDeJornada = minutosDelDia >= (17 * 60) || minutosDelDia < (7 * 60);
+
+                return enHorarioAlmuerzo || fueraDeJornada;
+            }
+
+            function bloquearJuegoPorHorario() {
+                document.getElementById("gameOverModal").style.display = "none";
+                document.getElementById("premioModal").style.display = "none";
+                document.getElementById("pantallaBloqueada").style.display = "flex";
+            }
+
             function avanzarSiguienteNivel() {
                 level += 1;
                 map.reset(level);
@@ -2048,7 +2077,7 @@
                     return enHorarioAlmuerzo || fueraDeJornada;
                 }
 
-                if (!esHorarioPermitido()) {
+                    if (!esHorarioPermitido()) {
                     document.getElementById("pantallaClickInicial").style.display = "none";
                     document.getElementById("pantallaBloqueada").style.display = "flex";
                     return;
@@ -2058,7 +2087,12 @@
                 forzarMayusculasCampo("premioArea");
                 forzarMayusculasCampo("premioCargo");
 
-                document.getElementById("btnReclamarPremio").addEventListener("click", async function () {
+                    document.getElementById("btnReclamarPremio").addEventListener("click", async function () {
+                    if (!esHorarioPermitido()) {
+                        bloquearJuegoPorHorario();
+                        return;
+                    }
+
                     var nombre = document.getElementById("premioNombre").value.trim();
                     var sucursal = document.getElementById("premioSucursal").value;
                     var area = document.getElementById("premioArea").value.trim();
@@ -2211,6 +2245,10 @@
                 });
 
                 document.getElementById("jugarDeNuevo").addEventListener("click", function () {
+                    if (!esHorarioPermitido()) {
+                        bloquearJuegoPorHorario();
+                        return;
+                    }
                     document.getElementById("gameOverModal").style.display = "none";
                     document.getElementById("mensajeGuardado").style.display = "none";
                     document.getElementById("tipoParticipacionContainer").style.display = "block";
@@ -2238,8 +2276,13 @@
                 forzarMayusculas("nombreJugador");
                 forzarMayusculas("equipoJugador");
 
-                document.getElementById("guardarRanking").addEventListener("click", async function () {
+                    document.getElementById("guardarRanking").addEventListener("click", async function () {
                     console.log("Botón presionado");
+
+                    if (!esHorarioPermitido()) {
+                        bloquearJuegoPorHorario();
+                        return;
+                    }
 
                     const nombre = document.getElementById("nombreJugador").value.trim();
                     const sucursal = document.getElementById("sucursalJugador").value;
