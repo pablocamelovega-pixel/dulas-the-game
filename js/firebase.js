@@ -1,15 +1,12 @@
 // URL de tu Función de Azure
-const AZURE_FUNCTION_URL = "https://dulas-the-game-api-abbmayetgkebfghn.centralus-01.azurewebsites.net/api/guardarPuntaje";
+const AZURE_FUNCTION_URL = "https://dulas-the-game-api-comercial-agf4hca0hwabgzg6.centralus-01.azurewebsites.net/api/guardarPuntaje";
 
-// Función global para guardar el puntaje desde el index.html
 window.guardarPuntaje = async function(nombre, sucursal, tipoParticipacion, equipo, puntaje, trivia) {
     console.log("Enviando datos a Azure...");
     try {
         const respuesta = await fetch(AZURE_FUNCTION_URL, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ nombre, sucursal, tipoParticipacion, equipo, puntaje, trivia })
         });
 
@@ -26,8 +23,7 @@ window.guardarPuntaje = async function(nombre, sucursal, tipoParticipacion, equi
     }
 };
 
-// URL de la Función que lee el ranking
-const AZURE_RANKING_URL = "https://dulas-the-game-api-abbmayetgkebfghn.centralus-01.azurewebsites.net/api/obtenerRanking";
+const AZURE_RANKING_URL = "https://dulas-the-game-api-comercial-agf4hca0hwabgzg6.centralus-01.azurewebsites.net/api/obtenerRanking";
 
 function crearTarjetaEquipo(equipo) {
     const tarjeta = document.createElement("div");
@@ -80,23 +76,18 @@ function cargarRanking() {
         });
 }
 
-// Cargar el ranking apenas se abre la página
 window.addEventListener("load", cargarRanking);
 
-// URL de la Función que verifica el cupo del equipo
-const AZURE_VERIFICAR_EQUIPO_URL = "https://dulas-the-game-api-abbmayetgkebfghn.centralus-01.azurewebsites.net/api/verificarEquipo";
+const AZURE_VERIFICAR_EQUIPO_URL = "https://dulas-the-game-api-comercial-agf4hca0hwabgzg6.centralus-01.azurewebsites.net/api/verificarEquipo";
 
-// URL de la Función que guarda los premios
-const AZURE_PREMIO_URL = "https://dulas-the-game-api-abbmayetgkebfghn.centralus-01.azurewebsites.net/api/guardarPremio";
+const AZURE_PREMIO_URL = "https://dulas-the-game-api-comercial-agf4hca0hwabgzg6.centralus-01.azurewebsites.net/api/guardarPremio";
 
 window.guardarPremio = async function(nombre, sucursal, area, cargo, puntaje) {
     console.log("Enviando premio a Azure...");
     try {
         const respuesta = await fetch(AZURE_PREMIO_URL, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ nombre, sucursal, area, cargo, puntaje })
         });
 
@@ -110,5 +101,21 @@ window.guardarPremio = async function(nombre, sucursal, area, cargo, puntaje) {
     } catch (error) {
         console.error("Error al guardar el premio en Azure:", error);
         throw error;
+    }
+};
+
+const AZURE_TRIVIA_URL = "https://dulas-the-game-api-comercial-agf4hca0hwabgzg6.centralus-01.azurewebsites.net/api/guardarTrivia";
+
+window.guardarEstadisticasTrivia = async function(trivia) {
+    if (!trivia || trivia.length === 0) { return; }
+    try {
+        await fetch(AZURE_TRIVIA_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ trivia })
+        });
+        console.log("Estadísticas de trivia guardadas.");
+    } catch (error) {
+        console.error("No se pudieron guardar las estadísticas de trivia:", error);
     }
 };
