@@ -1914,7 +1914,11 @@
                 return { diaSemana: mapa.weekday, hora: parseInt(mapa.hour, 10), minuto: parseInt(mapa.minute, 10) };
             }
 
-            function esHorarioPermitido() {
+                function esHorarioPermitido() {
+                if (window.modoPruebaSinHorarioGlobal) {
+                    return true;
+                }
+
                 var info = obtenerHoraBogota();
 
                 if (info.diaSemana === "Sat" || info.diaSemana === "Sun") {
@@ -2078,10 +2082,31 @@
                     return enHorarioAlmuerzo || fueraDeJornada;
                 }
 
-                    if (!esHorarioPermitido()) {
+                var modoPruebaSinHorario = false;
+
+                var CODIGO_PRUEBA_HORARIO = "DULAS2026TEST";
+
+                var botonInvisible = document.createElement("div");
+                botonInvisible.style.position = "fixed";
+                botonInvisible.style.top = "0";
+                botonInvisible.style.left = "0";
+                botonInvisible.style.width = "40px";
+                botonInvisible.style.height = "40px";
+                botonInvisible.style.zIndex = "99999";
+                botonInvisible.style.cursor = "default";
+                botonInvisible.addEventListener("click", function () {
+                    var codigoIngresado = window.prompt("Código de acceso:");
+                    if (codigoIngresado === CODIGO_PRUEBA_HORARIO) {
+                        window.modoPruebaSinHorarioGlobal = true;
+                        document.getElementById("pantallaBloqueada").style.display = "none";
+                        document.getElementById("pantallaClickInicial").style.display = "flex";
+                    }
+                });
+                document.body.appendChild(botonInvisible);
+
+                if (!esHorarioPermitido()) {
                     document.getElementById("pantallaClickInicial").style.display = "none";
                     document.getElementById("pantallaBloqueada").style.display = "flex";
-                    return;
                 }
 
                 forzarMayusculasCampo("premioNombre");
