@@ -1669,7 +1669,7 @@
                     textoDerrota.style.display = "none";
                 }
 
-                if (puntajeFinal >= 30000) {
+                if (puntajeFinal >= 28000) {
                     document.getElementById("premioModal").style.display = "flex";
                 } else {
                     document.getElementById("gameOverModal").style.display = "flex";
@@ -1905,7 +1905,7 @@
                 }
             }
 
-                        function obtenerHoraBogota() {
+                function obtenerHoraBogota() {
                 var ahora = new Date();
                 var opciones = { timeZone: "America/Bogota", hour12: false, weekday: "short", hour: "2-digit", minute: "2-digit" };
                 var partes = new Intl.DateTimeFormat("en-US", opciones).formatToParts(ahora);
@@ -2060,31 +2060,6 @@
                         function loaded() {
                 document.addEventListener("keydown", keyDown, true);
                 document.addEventListener("keypress", keyPress, true);
-
-                function obtenerHoraBogota() {
-                    var ahora = new Date();
-                    var opciones = { timeZone: "America/Bogota", hour12: false, weekday: "short", hour: "2-digit", minute: "2-digit" };
-                    var partes = new Intl.DateTimeFormat("en-US", opciones).formatToParts(ahora);
-                    var mapa = {};
-                    partes.forEach(function (p) { mapa[p.type] = p.value; });
-                    return { diaSemana: mapa.weekday, hora: parseInt(mapa.hour, 10), minuto: parseInt(mapa.minute, 10) };
-                }
-
-                function esHorarioPermitido() {
-                    var info = obtenerHoraBogota();
-
-                    if (info.diaSemana === "Sat" || info.diaSemana === "Sun") {
-                        return true;
-                    }
-
-                    var minutosDelDia = (info.hora * 60) + info.minuto;
-                    var enHorarioAlmuerzo = minutosDelDia >= (12 * 60) && minutosDelDia < (14 * 60);
-                    var fueraDeJornada = minutosDelDia >= (17 * 60) || minutosDelDia < (7 * 60);
-
-                    return enHorarioAlmuerzo || fueraDeJornada;
-                }
-
-                var modoPruebaSinHorario = false;
 
                 var CODIGO_PRUEBA_HORARIO = "DULAS2026TEST";
 
