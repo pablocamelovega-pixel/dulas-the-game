@@ -252,6 +252,39 @@
             opacity: 0;
         }
 
+        @keyframes flotar {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-12px); }
+        }
+
+        #imagenGruposFlotante {
+            position: absolute;
+            top: 8%;
+            max-width: 60%;
+            max-height: 110px;
+            z-index: 2;
+            animation: flotar 3s ease-in-out infinite;
+            opacity: 0;
+            transition: opacity 1s ease-in;
+        }
+
+        #imagenGruposFlotante.mostrar {
+            opacity: 1;
+        }
+
+        #imagenEstaticaAbajo {
+            margin-top: 15px;
+            max-width: 70%;
+            max-height: 45px;
+            z-index: 2;
+            opacity: 0;
+            transition: opacity 1s ease-in;
+        }
+
+        #imagenEstaticaAbajo.mostrar {
+            opacity: 1;
+        }
+
         #startSNES.mostrarStart {
             opacity: 1;
             animation: parpadeoStart 1s steps(1) infinite;
@@ -396,6 +429,8 @@
         <img id="bacteriaIntro" src="assets/bacteria.png" alt="">
         <div id="destelloSNES"></div>
 
+        <img id="imagenGruposFlotante" src="assets/grupos-premios.png" alt="" onerror="this.style.display='none';">
+
         <img id="logoIntro" src="assets/logo-salud-total.png" alt="Salud Total EPS-S">
         <p id="subtituloSNES">LOS PLANES COMPLEMENTARIOS PRESENTAN</p>
         <h1 id="tituloSNES">
@@ -407,6 +442,8 @@
             <span id="tituloSNESTexto" style="display:none;">DULAS<br>THE GAME</span>
         </h1>
         <p id="startSNES">👻 PULSA ENTER PARA EMPEZAR 👻</p>
+
+        <img id="imagenEstaticaAbajo" src="assets/imagen-abajo-enter.png" alt="" onerror="this.style.display='none';">
 
         <div id="footerSNES">
             <p>© 2026 SALUD TOTAL EPS-S</p>
@@ -2180,16 +2217,18 @@
                     setTimeout(function () {
                         titulo.classList.add("posicionado");
                         document.getElementById("logoIntro").classList.add("mostrar");
+                        document.getElementById("imagenGruposFlotante").classList.add("mostrar");
                     }, 1900);
 
                     setTimeout(function () {
                         destello.classList.add("encender");
                     }, 2800);
 
-                    setTimeout(function () {
+                        setTimeout(function () {
                         destello.classList.remove("encender");
                         destello.classList.add("apagar");
                         start.classList.add("mostrarStart");
+                        document.getElementById("imagenEstaticaAbajo").classList.add("mostrar");
                         animacionSNESLista = true;
                     }, 3150);
                 }
