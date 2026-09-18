@@ -1,0 +1,111 @@
+// ⚠️ IMPORTANTE: reemplaza estas 5 URLs por las reales de tus 5 Funciones de Comercial
+// (cópialas del botón "Obtener URL de función" de cada una en el portal de Azure)
+const AZURE_FUNCTION_URL = "https://dulas-comercial-api2026-fbc2cyc2e4fachdu.westus3-01.azurewebsites.net/api/guardarPuntaje";
+const AZURE_RANKING_URL = "https://dulas-comercial-api2026-fbc2cyc2e4fachdu.westus3-01.azurewebsites.net/api/obtenerRanking";
+const AZURE_VERIFICAR_EQUIPO_URL = "https://dulas-comercial-api2026-fbc2cyc2e4fachdu.westus3-01.azurewebsites.net/api/verificarEquipo";
+const AZURE_PREMIO_URL = "https://dulas-comercial-api2026-fbc2cyc2e4fachdu.westus3-01.azurewebsites.net/api/guardarPremio";
+const AZURE_TRIVIA_URL = "https://dulas-comercial-api2026-fbc2cyc2e4fachdu.westus3-01.azurewebsites.net/api/guardarTrivia";
+
+window.guardarPuntaje = async function(nombre, sucursal, tipoParticipacion, equipo, puntaje, trivia) {
+    console.log("Enviando datos a Azure (Comercial)...");
+    try {
+        const respuesta = await fetch(AZURE_FUNCTION_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ nombre, sucursal, tipoParticipacion, equipo, puntaje, trivia })
+        });
+
+        if (!respuesta.ok) {
+            throw new Error("Error del servidor: " + respuesta.status);
+        }
+
+        const resultado = await respuesta.json();
+        console.log("¡Éxito! Puntaje guardado:", resultado);
+
+    } catch (error) {
+        console.error("Error al guardar en Azure:", error);
+        throw error;
+    }
+};
+
+function crearTarjetaJugador(jugador) {
+    const tarjeta = document.createElement("div");
+    tarjeta.style.border = "2px solid yellow";
+    tarjeta.style.borderRadius = "8px";
+    tarjeta.style.padding = "8px 12px";
+    tarjeta.style.margin = "8px 0";
+    tarjeta.style.display = "flex";
+    tarjeta.style.justifyContent = "space-between";
+    tarjeta.style.fontWeight = "bold";
+
+    tarjeta.innerHTML =
+        "<span>" + jugador.nombre + "</span>" +
+        "<span>" + jugador.puntaje + " pts</span>";
+
+    return tarjeta;
+}
+
+function cargarRanking() {
+    fetch(AZURE_RANKING_URL)
+        .then(function (respuesta) { return respuesta.json(); })
+        .then(function (datos) {
+            document.getElementById("highScoreValor").innerText =
+                datos.highScore.nombre + " — " + datos.highScore.puntaje + " pts";
+
+            const contenedor = document.getElementById("listaComercial");
+            contenedor.innerHTML = "";
+
+            const listaJugadores = datos.rankingJugadores || [];
+
+            listaJugadores.forEach(function (jugador) {
+                contenedor.appendChild(crearTarjetaJugador(jugador));
+            });
+
+            if (!contenedor.hasChildNodes()) {
+                contenedor.innerText = "Sin registros todavía.";
+            }
+        })
+        .catch(function (error) {
+            console.error("Error al cargar el ranking:", error);
+            document.getElementById("listaComercial").innerText = "No se pudo cargar el ranking.";
+        });
+}
+
+window.addEventListener("load", cargarRanking);
+
+window.guardarPremio = async function(nombre, sucursal, area, cargo, puntaje) {
+    console.log("Enviando premio a Azure (Comercial)...");
+    try {
+        const respuesta = await fetch(AZURE_PREMIO_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ nombre, sucursal, area, cargo, puntaje })
+        });
+
+        if (!respuesta.ok) {
+            throw new Error("Error del servidor: " + respuesta.status);
+        }
+
+        const resultado = await respuesta.json();
+        console.log("Resultado del premio:", resultado);
+        return resultado;
+
+    } catch (error) {
+        console.error("Error al guardar el premio en Azure:", error);
+        throw error;
+    }
+};
+
+window.guardarEstadisticasTrivia = async function(trivia) {
+    if (!trivia || trivia.length === 0) { return; }
+    try {
+        await fetch(AZURE_TRIVIA_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ trivia })
+        });
+        console.log("Estadísticas de trivia guardadas.");
+    } catch (error) {
+        console.error("No se pudieron guardar las estadísticas de trivia:", error);
+    }
+};
