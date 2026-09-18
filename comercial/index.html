@@ -1,0 +1,3221 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dulas The Game</title>
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Permanent+Marker">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
+    <style type="text/css">
+        body {
+            background: radial-gradient(ellipse at center, #1a0033 0%, #000000 80%);
+            width: 100%;
+            max-width: 1050px;
+            margin: 0px auto;
+            font-family: sans-serif;
+            box-sizing: border-box;
+            padding: 0 10px;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: repeating-linear-gradient(
+                to bottom,
+                rgba(255,255,255,0.05) 0px,
+                rgba(255,255,255,0.05) 1px,
+                transparent 2px,
+                transparent 4px
+            );
+            animation: moverEscaneo 0.5s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        #pacman {
+            width: 100%;
+            max-width: 382px;
+            height: auto;
+            border-radius: 5px;
+            margin: 20px auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        #shim {
+            font-family: 'Permanent Marker', cursive;
+            position: absolute;
+            visibility: hidden
+        }
+
+        h1 {
+            font-family: 'Permanent Marker', cursive;
+            text-align: center;
+            color: white;
+        }
+        #tituloJuego {
+            font-family: 'Pixelify Sans', sans-serif;
+        }
+        p {
+            text-decoration: none;
+            color: white;
+        }
+
+        @keyframes brilloNeon {
+            0%, 100% { 
+                text-shadow: 0 0 10px #ff0055, 0 0 20px #ff0055, 0 0 30px #ff00ff;
+                color: #ffccff;
+            }
+            50% { 
+                text-shadow: 0 0 20px #00eaff, 0 0 40px #00eaff, 0 0 60px #00aaff;
+                color: #ccffff;
+            }
+        }
+
+        @keyframes parpadeoStart {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        @keyframes titilarEstrella {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes moverEscaneo {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 8px; }
+        }
+
+        #pantallaInicioSNES {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center, #1a0033 0%, #000000 80%);
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20000;
+            overflow: hidden;
+            font-family: 'Pixelify Sans', monospace;
+            opacity: 1;
+            transform: scale(1);
+            transition: opacity 0.6s ease-in, transform 0.6s ease-in;
+        }
+
+        #pantallaInicioSNES.saliendo {
+            opacity: 0;
+            transform: scale(1.3);
+        }
+
+        #pantallaInicioSNES.entrando {
+            opacity: 0;
+            transform: scale(0.85);
+        }
+
+        #pantallaClickInicial {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 40000;
+            transition: opacity 0.5s ease-out;
+        }
+
+        #pantallaBloqueada {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: #000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 40000;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        #cajaBloqueada {
+            color: white;
+            font-family: 'Pixelify Sans', monospace;
+            max-width: 400px;
+        }
+
+        #cajaBloqueada h2 {
+            color: #ff6666;
+            font-family: 'Pixelify Sans', monospace;
+        }
+
+        #pantallaClickInicial.ocultando {
+            opacity: 0;
+        }
+
+        #botonClickInicial {
+            color: white;
+            font-family: 'Pixelify Sans', monospace;
+            font-size: 22px;
+            letter-spacing: 2px;
+            text-align: center;
+            border: 3px solid #ffff00;
+            border-radius: 10px;
+            padding: 25px 35px;
+            cursor: pointer;
+        }
+
+        #logoIntro {
+            max-width: 500px;
+            display: block;
+            margin: 0 auto 10px auto;
+            opacity: 0;
+            transition: opacity 1s ease-in;
+            position: relative;
+            z-index: 2;
+        }
+
+        #logoIntro.mostrar {
+            opacity: 1;
+        }
+
+        #pantallaInicioSNES::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: repeating-linear-gradient(
+                to bottom,
+                rgba(255,255,255,0.05) 0px,
+                rgba(255,255,255,0.05) 1px,
+                transparent 2px,
+                transparent 4px
+            );
+            animation: moverEscaneo 0.5s linear infinite;
+            pointer-events: none;
+        }
+
+        .estrellaSNES {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: white;
+            border-radius: 50%;
+            animation: titilarEstrella 1.8s ease-in-out infinite;
+        }
+
+        #tituloSNES {
+            font-size: 42px;
+            font-weight: bold;
+            letter-spacing: 4px;
+            margin: 0;
+            text-align: center;
+            z-index: 2;
+            position: relative;
+            top: -400px;
+            transition: top 0.8s ease-out;
+            background: linear-gradient(180deg, #ffffff 0%, #ffd6f7 15%, #ff7edb 30%, #ffe066 50%, #ff7edb 70%, #b967ff 85%, #ffffff 100%);
+            background-size: 100% 300%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 3px 3px 0 #3a1155, 5px 5px 6px rgba(0,0,0,0.6);
+            animation: brilloCromado 3s linear infinite;
+        }
+
+        @keyframes brilloCromado {
+            0% { background-position: 0 0%; }
+            100% { background-position: 0 100%; }
+        }
+
+        #subtituloSNES {
+            color: #66ffff;
+            font-size: 14px;
+            letter-spacing: 3px;
+            margin-top: 10px;
+            z-index: 2;
+        }
+
+        #startSNES {
+            margin-top: 60px;
+            color: #ffff00;
+            font-size: 20px;
+            letter-spacing: 2px;
+            z-index: 2;
+            opacity: 0;
+        }
+
+        @keyframes flotar {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-12px); }
+        }
+
+        #imagenGruposFlotante {
+            position: absolute;
+            top: 8%;
+            max-width: 60%;
+            max-height: 110px;
+            z-index: 2;
+            animation: flotar 3s ease-in-out infinite;
+            opacity: 0;
+            transition: opacity 1s ease-in;
+        }
+
+        #imagenGruposFlotante.mostrar {
+            opacity: 1;
+        }
+
+        #imagenEstaticaAbajo {
+            margin-top: 15px;
+            max-width: 70%;
+            max-height: 45px;
+            z-index: 2;
+            opacity: 0;
+            transition: opacity 1s ease-in;
+        }
+
+        #imagenEstaticaAbajo.mostrar {
+            opacity: 1;
+        }
+
+        #startSNES.mostrarStart {
+            opacity: 1;
+            animation: parpadeoStart 1s steps(1) infinite;
+        }
+
+        #tituloSNES.posicionado {
+            top: 0;
+        }
+
+        #boxeadorIntro {
+            position: absolute;
+            left: -50%;
+            bottom: 0;
+            height: 65vh;
+            max-height: 480px;
+            z-index: 3;
+            transition: left 1s cubic-bezier(0.2, 0.7, 0.3, 1);
+        }
+
+        #boxeadorIntro.posicionado {
+            left: 2%;
+        }
+
+        #bacteriaIntro {
+            position: absolute;
+            right: -50%;
+            bottom: 0;
+            height: 60vh;
+            max-height: 450px;
+            z-index: 3;
+            transition: right 1s cubic-bezier(0.2, 0.7, 0.3, 1);
+        }
+
+        #bacteriaIntro.posicionado {
+            right: 2%;
+        }
+
+        #destelloSNES {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: white;
+            opacity: 0;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        #destelloSNES.encender {
+            transition: opacity 0.3s ease-in;
+            opacity: 1;
+        }
+
+        #destelloSNES.apagar {
+            transition: opacity 0.8s ease-out;
+            opacity: 0;
+        }
+
+        #footerSNES {
+            position: absolute;
+            bottom: 35px;
+            text-align: center;
+            color: white;
+            font-size: 11px;
+            letter-spacing: 1px;
+            z-index: 2;
+            line-height: 1.8;
+        }
+
+        #marcoSNES {
+            position: absolute;
+            top: 15px; left: 15px; right: 15px; bottom: 15px;
+            border: 4px solid #8844ff;
+            border-radius: 10px;
+            box-shadow: 0 0 25px #8844ff inset, 0 0 15px #8844ff;
+            pointer-events: none;
+            z-index: 2;
+        }
+    </style>
+</head>
+<body>
+    <div id="shim">shim for font face</div>
+    <h1 id="tituloJuego">
+        <img id="tituloJuegoImagen"
+             src="assets/titulo-dulas.png"
+             alt="DULAS - THE GAME"
+             style="max-width:100%;max-height:60px;display:block;margin:0 auto;"
+             onerror="this.style.display='none'; document.getElementById('tituloJuegoTexto').style.display='block';">
+        <span id="tituloJuegoTexto" style="display:none;">DULAS - THE GAME</span>
+    </h1>
+    <p style="text-align:center;">Ayuda a DULAS a recorrer el laberinto, recoge todos los puntos y evita a los enemigos para conseguir la mayor puntuación posible.</p>
+    
+<div id="cajaHighScore" style="
+        max-width:400px;
+        margin:15px auto;
+        border:2px solid yellow;
+        border-radius:8px;
+        padding:10px 20px;
+        text-align:center;
+        color:yellow;
+        font-family:Arial;
+        font-weight:bold;
+        font-size:18px;
+    ">
+        High Score: <span id="highScoreValor">Cargando...</span>
+    </div>
+    
+    <div style="display:flex; justify-content:center; align-items:flex-start; gap:20px; flex-wrap:wrap;">
+
+        <div id="panelComercial" style="
+            width:320px;
+            max-width:90vw;
+            max-height:520px;
+            overflow-y:auto;
+            color:white;
+            font-family:Arial;
+        ">
+            <h2 style="text-align:center;">🏆 Ranking Comercial</h2>
+            <div id="listaComercial">Cargando ranking...</div>
+        </div>
+
+<div id="pantallaClickInicial">
+        <div id="botonClickInicial">🔊 TOCA PARA COMENZAR 🔊</div>
+    </div>
+
+    <div id="pantallaBloqueada">
+        <div id="cajaBloqueada">
+            <img src="assets/bloqueado.gif" alt="Fuera de horario" style="max-width:100%;display:block;margin:0 auto 15px auto;">
+            <h2>⏰ Fuera de horario</h2>
+            <p>Dulas The Game solo está disponible:</p>
+            <p>🕐 Lunes a viernes, de 12:00 m. a 2:00 p.m. y de 5:00 p.m. a 7:00 a.m</p>
+            <p>📅 Sábados y domingos, todo el día</p>
+        </div>
+    </div>
+
+    <audio id="audioIntro" src="assets/audio-intro.mp3" preload="auto"></audio>
+
+        <div id="pantallaInicioSNES">
+        <div id="marcoSNES"></div>
+        <div id="campoEstrellasSNES"></div>
+
+<img id="boxeadorIntro" src="assets/boxeador.png" alt="">
+        <img id="bacteriaIntro" src="assets/bacteria.png" alt="">
+        <div id="destelloSNES"></div>
+
+        <img id="imagenGruposFlotante" src="assets/grupos-premios.png" alt="" onerror="this.style.display='none';">
+
+        <img id="logoIntro" src="assets/logo-salud-total.png" alt="Salud Total EPS-S">
+        <p id="subtituloSNES">LOS PLANES COMPLEMENTARIOS PRESENTAN</p>
+        <h1 id="tituloSNES">
+            <img id="tituloSNESImagen"
+                 src="assets/titulo-dulas.png"
+                 alt="DULAS THE GAME"
+                 style="max-width:100%;max-height:120px;display:block;margin:0 auto;"
+                 onerror="this.style.display='none'; document.getElementById('tituloSNESTexto').style.display='block';">
+            <span id="tituloSNESTexto" style="display:none;">DULAS<br>THE GAME</span>
+        </h1>
+        <p id="startSNES">👻 PULSA ENTER PARA EMPEZAR 👻</p>
+
+        <img id="imagenEstaticaAbajo" src="assets/imagen-abajo-enter.png" alt="" onerror="this.style.display='none';">
+
+        <div id="footerSNES">
+            <p>© 2026 SALUD TOTAL EPS-S</p>
+            <p>DULAS THE GAME</p>
+        </div>
+        </div>
+
+    <div id="pacman"></div>
+
+    </div>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script type="text/javascript">
+        /*jslint browser: true, undef: true, eqeqeq: true, nomen: true, white: true */
+        /*global window: false, document: false */
+
+        var NONE        = 4,
+            UP          = 3,
+            LEFT        = 2,
+            DOWN        = 1,
+            RIGHT       = 11,
+            WAITING     = 5,
+            PAUSE       = 6,
+            PLAYING     = 7,
+            COUNTDOWN   = 8,
+            EATEN_PAUSE = 9,
+            DYING       = 10,
+            Pacman      = {};
+
+        Pacman.FPS = 30;
+
+        Pacman.Ghost = function (game, map, colour) {
+            var position  = null,
+                direction = null,
+                eatable   = null,
+                eaten     = null,
+                due       = null;
+            
+            function getNewCoord(dir, current) { 
+                var speed  = isVunerable() ? 1 : isHidden() ? 4 : velocidadNormal(),
+                    xSpeed = (dir === LEFT && -speed || dir === RIGHT && speed || 0),
+                    ySpeed = (dir === DOWN && speed || dir === UP && -speed || 0);
+            
+                return {
+                    "x": addBounded(current.x, xSpeed),
+                    "y": addBounded(current.y, ySpeed)
+                };
+            };
+
+           function velocidadNormal() {
+                var nivelActual = (game.getLevel) ? game.getLevel() : 1;
+                if (nivelActual >= 3) {
+                    return 6;
+                } else if (nivelActual >= 2) {
+                    return 4;
+                }
+                return 2;
+            };
+
+            function addBounded(x1, x2) { 
+                var rem    = x1 % 10, 
+                    result = rem + x2;
+                if (rem !== 0 && result > 10) {
+                    return x1 + (10 - rem);
+                } else if(rem > 0 && result < 0) { 
+                    return x1 - rem;
+                }
+                return x1 + x2;
+            };
+            
+            function isVunerable() { 
+                return eatable !== null;
+            };
+            
+            function isDangerous() {
+                return eaten === null;
+            };
+
+            function isHidden() { 
+                return eatable === null && eaten !== null;
+            };
+            
+            function getRandomDirection() {
+                var moves = (direction === LEFT || direction === RIGHT) 
+                    ? [UP, DOWN] : [LEFT, RIGHT];
+                return moves[Math.floor(Math.random() * 2)];
+            };
+            
+            function reset() {
+                eaten = null;
+                eatable = null;
+                position = {"x": 90, "y": 80};
+                direction = getRandomDirection();
+                due = getRandomDirection();
+            };
+            
+            function onWholeSquare(x) {
+                return x % 10 === 0;
+            };
+            
+            function oppositeDirection(dir) { 
+                return dir === LEFT && RIGHT ||
+                    dir === RIGHT && LEFT ||
+                    dir === UP && DOWN || UP;
+            };
+
+            function makeEatable() {
+                direction = oppositeDirection(direction);
+                eatable = game.getTick();
+            };
+
+            function eat() { 
+                eatable = null;
+                eaten = game.getTick();
+            };
+
+            function pointToCoord(x) {
+                return Math.round(x / 10);
+            };
+
+            function nextSquare(x, dir) {
+                var rem = x % 10;
+                if (rem === 0) { 
+                    return x; 
+                } else if (dir === RIGHT || dir === DOWN) { 
+                    return x + (10 - rem);
+                } else {
+                    return x - rem;
+                }
+            };
+
+            function onGridSquare(pos) {
+                return onWholeSquare(pos.y) && onWholeSquare(pos.x);
+            };
+
+            function secondsAgo(tick) { 
+                return (game.getTick() - tick) / Pacman.FPS;
+            };
+
+            function getColour() { 
+                if (eatable) { 
+                    if (secondsAgo(eatable) > 5) { 
+                        return game.getTick() % 20 > 10 ? "#FFFFFF" : "#0000BB";
+                    } else { 
+                        return "#0000BB";
+                    }
+                } else if(eaten) { 
+                    return "#222";
+                } 
+                return colour;
+            };
+
+            function draw(ctx) {
+                var s    = map.blockSize, 
+                    top  = (position.y/10) * s,
+                    left = (position.x/10) * s;
+            
+                if (eatable && secondsAgo(eatable) > 8) {
+                    eatable = null;
+                }
+                
+                if (eaten && secondsAgo(eaten) > 3) { 
+                    eaten = null;
+                }
+                
+                var tl = left + s;
+                var base = top + s - 3;
+                var inc = s / 10;
+
+                var high = game.getTick() % 10 > 5 ? 3  : -3;
+                var low  = game.getTick() % 10 > 5 ? -3 : 3;
+
+                ctx.fillStyle = getColour();
+                ctx.beginPath();
+
+                ctx.moveTo(left, base);
+
+                ctx.quadraticCurveTo(left, top, left + (s/2),  top);
+                ctx.quadraticCurveTo(left + s, top, left+s,  base);
+                
+                ctx.quadraticCurveTo(tl-(inc*1), base+high, tl - (inc * 2),  base);
+                ctx.quadraticCurveTo(tl-(inc*3), base+low, tl - (inc * 4),  base);
+                ctx.quadraticCurveTo(tl-(inc*5), base+high, tl - (inc * 6),  base);
+                ctx.quadraticCurveTo(tl-(inc*7), base+low, tl - (inc * 8),  base); 
+                ctx.quadraticCurveTo(tl-(inc*9), base+high, tl - (inc * 10), base); 
+
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.fillStyle = "#FFF";
+                ctx.arc(left + 6,top + 6, s / 6, 0, 300, false);
+                ctx.arc((left + s) - 6,top + 6, s / 6, 0, 300, false);
+                ctx.closePath();
+                ctx.fill();
+
+                var f = s / 12;
+                var off = {};
+                off[RIGHT] = [f, 0];
+                off[LEFT]  = [-f, 0];
+                off[UP]    = [0, -f];
+                off[DOWN]  = [0, f];
+
+                ctx.beginPath();
+                ctx.fillStyle = "#000";
+                ctx.arc(left+6+off[direction][0], top+6+off[direction][1], 
+                        s / 15, 0, 300, false);
+                ctx.arc((left+s)-6+off[direction][0], top+6+off[direction][1], 
+                        s / 15, 0, 300, false);
+                ctx.closePath();
+                ctx.fill();
+            };
+
+            function pane(pos) {
+                if (pos.y === 100 && pos.x >= 190 && direction === RIGHT) {
+                    return {"y": 100, "x": -10};
+                }
+                if (pos.y === 100 && pos.x <= -10 && direction === LEFT) {
+                    return position = {"y": 100, "x": 190};
+                }
+                return false;
+            };
+            
+            function move(ctx) {
+                var oldPos = position,
+                    onGrid = onGridSquare(position),
+                    npos   = null;
+                
+                if (due !== direction) {
+                    npos = getNewCoord(due, position);
+                    if (onGrid &&
+                        map.isFloorSpace({
+                            "y":pointToCoord(nextSquare(npos.y, due)),
+                            "x":pointToCoord(nextSquare(npos.x, due))})) {
+                        direction = due;
+                    } else {
+                        npos = null;
+                    }
+                }
+                
+                if (npos === null) {
+                    npos = getNewCoord(direction, position);
+                }
+                
+                if (onGrid &&
+                    map.isWallSpace({
+                        "y" : pointToCoord(nextSquare(npos.y, direction)),
+                        "x" : pointToCoord(nextSquare(npos.x, direction))
+                    })) {
+                    
+                    due = getRandomDirection();            
+                    return move(ctx);
+                }
+
+                position = npos;        
+                
+                var tmp = pane(position);
+                if (tmp) { 
+                    position = tmp;
+                }
+                
+                due = getRandomDirection();
+                
+                return {
+                    "new" : position,
+                    "old" : oldPos
+                };
+            };
+            
+            return {
+                "eat"         : eat,
+                "isVunerable" : isVunerable,
+                "isDangerous" : isDangerous,
+                "makeEatable" : makeEatable,
+                "reset"       : reset,
+                "move"        : move,
+                "draw"        : draw
+            };
+        };
+
+        Pacman.User = function (game, map) {
+            var position  = null,
+                direction = null,
+                eaten     = null,
+                due       = null, 
+                lives     = null,
+                score     = 5,
+                keyMap    = {},
+                imagenCerrada = new Image(),
+                imagenAbierta = new Image();
+
+            imagenCerrada.src = "assets/perrito-dulas-cerrado.png";
+            imagenAbierta.src = "assets/perrito-dulas-abierto.png";
+            
+            keyMap[KEY.ARROW_LEFT]  = LEFT;
+            keyMap[KEY.ARROW_UP]    = UP;
+            keyMap[KEY.ARROW_RIGHT] = RIGHT;
+            keyMap[KEY.ARROW_DOWN]  = DOWN;
+
+            function addScore(nScore) { 
+                score += nScore;
+                if (score >= 10000 && score - nScore < 10000) { 
+                    lives += 1;
+                }
+            };
+
+            function theScore() { 
+                return score;
+            };
+
+            function loseLife() { 
+                lives -= 1;
+            };
+
+            function addLife() {
+                lives += 1;
+            };
+
+            function getLives() {
+                return lives;
+            };
+
+            function initUser() {
+                score = 0;
+                lives = 2;
+                newLevel();
+            }
+            
+            function newLevel() {
+                resetPosition();
+                eaten = 0;
+            };
+            
+            function resetPosition() {
+                position = {"x": 90, "y": 120};
+                direction = LEFT;
+                due = LEFT;
+            };
+            
+            function reset() {
+                initUser();
+                resetPosition();
+            };        
+            
+            function keyDown(e) {
+                if (typeof keyMap[e.keyCode] !== "undefined") { 
+                    due = keyMap[e.keyCode];
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+                return true;
+            };
+
+            function getNewCoord(dir, current) {   
+                var speed = velocidadPacman();
+                return {
+                    "x": addBounded(current.x, (dir === LEFT && -speed || dir === RIGHT && speed || 0)),
+                    "y": addBounded(current.y, (dir === DOWN && speed || dir === UP    && -speed || 0))
+                };
+            };
+
+            function addBounded(x1, x2) { 
+                var rem    = x1 % 10, 
+                    result = rem + x2;
+                if (rem !== 0 && result > 10) {
+                    return x1 + (10 - rem);
+                } else if (rem > 0 && result < 0) { 
+                    return x1 - rem;
+                }
+                return x1 + x2;
+            };
+
+           function velocidadPacman() {
+                var nivelActual = (game.getLevel) ? game.getLevel() : 1;
+                var base = 2;
+                if (nivelActual >= 3) {
+                    base = 6;
+                } else if (nivelActual >= 2) {
+                    base = 4;
+                }
+                if (game.estaEnModoVelocidad && game.estaEnModoVelocidad()) {
+                    base += 4;
+                }
+                return base;
+            };
+
+            function onWholeSquare(x) {
+                return x % 10 === 0;
+            };
+
+            function pointToCoord(x) {
+                return Math.round(x/10);
+            };
+            
+            function nextSquare(x, dir) {
+                var rem = x % 10;
+                if (rem === 0) { 
+                    return x; 
+                } else if (dir === RIGHT || dir === DOWN) { 
+                    return x + (10 - rem);
+                } else {
+                    return x - rem;
+                }
+            };
+
+            function next(pos, dir) {
+                return {
+                    "y" : pointToCoord(nextSquare(pos.y, dir)),
+                    "x" : pointToCoord(nextSquare(pos.x, dir)),
+                };                               
+            };
+
+            function onGridSquare(pos) {
+                return onWholeSquare(pos.y) && onWholeSquare(pos.x);
+            };
+
+            function isOnSamePlane(due, dir) { 
+                return ((due === LEFT || due === RIGHT) && 
+                        (dir === LEFT || dir === RIGHT)) || 
+                    ((due === UP || due === DOWN) && 
+                     (dir === UP || dir === DOWN));
+            };
+
+            function move(ctx) {
+                var npos        = null, 
+                    nextWhole   = null, 
+                    oldPosition = position,
+                    block       = null;
+                
+                if (due !== direction) {
+                    npos = getNewCoord(due, position);
+                    
+                    if (isOnSamePlane(due, direction) || 
+                        (onGridSquare(position) && 
+                         map.isFloorSpace(next(npos, due)))) {
+                        direction = due;
+                    } else {
+                        npos = null;
+                    }
+                }
+
+                if (npos === null) {
+                    npos = getNewCoord(direction, position);
+                }
+                
+                if (onGridSquare(position) && map.isWallSpace(next(npos, direction))) {
+                    direction = NONE;
+                }
+
+                if (direction === NONE) {
+                    return {"new" : position, "old" : position};
+                }
+                
+                if (npos.y === 100 && npos.x >= 190 && direction === RIGHT) {
+                    npos = {"y": 100, "x": -10};
+                }
+                
+                if (npos.y === 100 && npos.x <= -12 && direction === LEFT) {
+                    npos = {"y": 100, "x": 190};
+                }
+                
+                position = npos;        
+                nextWhole = next(position, direction);
+                
+                block = map.block(nextWhole);        
+                
+                if ((isMidSquare(position.y) || isMidSquare(position.x)) &&
+                    block === Pacman.BISCUIT || block === Pacman.PILL) {
+                    
+                    map.setBlock(nextWhole, Pacman.EMPTY);           
+                    addScore(((block === Pacman.BISCUIT) ? 10 : 50) * ((game.estaEnModoPuntos && game.estaEnModoPuntos()) ? 2 : 1));
+                    eaten += 1;
+                    
+                    if (eaten === map.getTotalComestibles()) {
+                        game.completedLevel();
+                    }
+                    
+                    if (block === Pacman.PILL) { 
+                        game.eatenPill(nextWhole.x >= 9);
+                    }
+                }   
+                        
+                return {
+                    "new" : position,
+                    "old" : oldPosition
+                };
+            };
+
+            function isMidSquare(x) { 
+                var rem = x % 10;
+                return rem > 3 || rem < 7;
+            };
+
+            function calcAngle(dir, pos) { 
+                if (dir == RIGHT && (pos.x % 10 < 5)) {
+                    return {"start":0.25, "end":1.75, "direction": false};
+                } else if (dir === DOWN && (pos.y % 10 < 5)) { 
+                    return {"start":0.75, "end":2.25, "direction": false};
+                } else if (dir === UP && (pos.y % 10 < 5)) { 
+                    return {"start":1.25, "end":1.75, "direction": true};
+                } else if (dir === LEFT && (pos.x % 10 < 5)) {            
+                    return {"start":0.75, "end":1.25, "direction": true};
+                }
+                return {"start":0, "end":2, "direction": false};
+            };
+
+            function drawDead(ctx, amount) { 
+                var size = map.blockSize, 
+                    half = size / 2,
+                    cx = ((position.x/10) * size) + half,
+                    cy = ((position.y/10) * size) + half;
+
+                if (amount >= 1) { 
+                    return;
+                }
+
+                if (imagenCerrada.complete && imagenCerrada.naturalWidth > 0) {
+                    var anchoImg = size * 1.0
+                     * (1 - amount);
+                    var altoImg  = anchoImg * (imagenCerrada.naturalHeight / imagenCerrada.naturalWidth);
+                    ctx.save();
+                    ctx.globalAlpha = 1 - amount;
+                    ctx.drawImage(imagenCerrada, cx - anchoImg / 2, cy - altoImg / 2, anchoImg, altoImg);
+                    ctx.restore();
+                    return;
+                }
+
+                ctx.fillStyle = "#FFFF00";
+                ctx.beginPath();        
+                ctx.moveTo(cx, cy);
+                
+                ctx.arc(cx, cy, half, 0, Math.PI * 2 * amount, true); 
+                
+                ctx.fill();    
+            };
+
+            function draw(ctx) { 
+                var s     = map.blockSize, 
+                    angle = calcAngle(direction, position),
+                    cx    = ((position.x/10) * s) + s / 2,
+                    cy    = ((position.y/10) * s) + s / 2;
+
+                var bocaAbierta = (position.x % 10 > 2 && position.x % 10 < 8) ||
+                                   (position.y % 10 > 2 && position.y % 10 < 8);
+                var imagenActual = bocaAbierta ? imagenAbierta : imagenCerrada;
+
+                if (imagenActual.complete && imagenActual.naturalWidth > 0) {
+                    var anchoImg = s * 1.3;
+                    var altoImg  = anchoImg * (imagenActual.naturalHeight / imagenActual.naturalWidth);
+
+                    ctx.save();
+                    ctx.translate(cx, cy);
+
+                    if (direction === RIGHT) {
+                        ctx.scale(-1, 1);
+                    } else if (direction === UP) {
+                        ctx.rotate(Math.PI / 2);
+                    } else if (direction === DOWN) {
+                        ctx.rotate(-Math.PI / 2);
+                    }
+
+                    ctx.drawImage(imagenActual, -anchoImg / 2, -altoImg / 2, anchoImg, altoImg);
+                    ctx.restore();
+                    return;
+                }
+
+                ctx.fillStyle = "#FFFF00";
+
+                ctx.beginPath();        
+
+                ctx.moveTo(cx, cy);
+                
+                ctx.arc(cx, cy, s / 2, Math.PI * angle.start, 
+                        Math.PI * angle.end, angle.direction); 
+                
+                ctx.fill();    
+            };
+            
+            initUser();
+
+               return {
+                "draw"          : draw,
+                "drawDead"      : drawDead,
+                "move"          : move,
+                "addScore"      : addScore,
+                "theScore"      : theScore,
+                "loseLife"      : loseLife,
+                "addLife"       : addLife,
+                "getLives"      : getLives,
+                "reset"         : reset,
+                "resetPosition" : resetPosition,
+                "newLevel"      : newLevel,
+                "keyDown"       : keyDown
+            };
+       };
+
+              Pacman.Map = function (size) {
+            var height    = null, 
+                width     = null, 
+                blockSize = size,
+                pillSize  = 0,
+                map       = null,
+                esMapaSimple = false,
+                murosActuales = Pacman.WALLS,
+                totalComestibles = 0,
+                canvasFondo = document.createElement("canvas"),
+                ctxFondo    = canvasFondo.getContext("2d");
+            
+            function withinBounds(y, x) {
+                return y >= 0 && y < height && x >= 0 && x < width;
+            }
+            
+            function isWall(pos) {
+                return withinBounds(pos.y, pos.x) && map[pos.y][pos.x] === Pacman.WALL;
+            }
+            
+            function isFloorSpace(pos) {
+                if (!withinBounds(pos.y, pos.x)) {
+                    return false;
+                }
+                var peice = map[pos.y][pos.x];
+                return peice === Pacman.EMPTY || 
+                    peice === Pacman.BISCUIT ||
+                    peice === Pacman.PILL;
+            }
+            
+            function drawWall(ctx) {
+                var i, j, p, line;
+                
+                ctx.strokeStyle = "#0000FF";
+                ctx.lineWidth   = 5;
+                ctx.lineCap     = "round";
+
+                if (esMapaSimple) {
+                    ctx.fillStyle = "#0000FF";
+                    for (i = 0; i < height; i += 1) {
+                        for (j = 0; j < width; j += 1) {
+                            if (map[i][j] === Pacman.WALL) {
+                                ctx.fillRect(j * blockSize, i * blockSize, blockSize, blockSize);
+                            }
+                        }
+                    }
+                    return;
+                }
+                for (i = 0; i < Pacman.WALLS.length; i += 1) {
+                    line = Pacman.WALLS[i];
+                    ctx.beginPath()
+
+                    for (j = 0; j < line.length; j += 1) {
+                        p = line[j];
+                        
+                        if (p.move) {
+                            ctx.moveTo(p.move[0] * blockSize, p.move[1] * blockSize);
+                        } else if (p.line) {
+                            ctx.lineTo(p.line[0] * blockSize, p.line[1] * blockSize);
+                        } else if (p.curve) {
+                            ctx.quadraticCurveTo(p.curve[0] * blockSize, 
+                                                 p.curve[1] * blockSize,
+                                                 p.curve[2] * blockSize, 
+                                                 p.curve[3] * blockSize);   
+                        }
+                    }
+                    ctx.stroke();
+                }
+            }
+            
+            function reset(nivelActual) {       
+                var gridElegido = Pacman.MAP;
+                esMapaSimple = false;
+
+               if (nivelActual >= 3) {
+                    gridElegido = Pacman.MAP_NIVEL_4_5;
+                    esMapaSimple = true;
+                } else if (nivelActual >= 2) {
+                    gridElegido = Pacman.MAP_NIVEL_2_3;
+                    esMapaSimple = true;
+                }
+
+                map    = gridElegido.clone();
+                map    = gridElegido.clone();
+                height = map.length;
+                width  = map[0].length;
+
+                totalComestibles = 0;
+                for (var i = 0; i < height; i += 1) {
+                    for (var j = 0; j < width; j += 1) {
+                        if (map[i][j] === Pacman.BISCUIT || map[i][j] === Pacman.PILL) {
+                            totalComestibles += 1;
+                        }
+                    }
+                }
+
+                canvasFondo.width  = width * blockSize;
+                canvasFondo.height = height * blockSize;
+                ctxFondo.clearRect(0, 0, canvasFondo.width, canvasFondo.height);
+                drawWall(ctxFondo);
+            };
+
+            function getTotalComestibles() {
+                return totalComestibles;
+            };
+
+            function block(pos) {
+                return map[pos.y][pos.x];
+            };
+            
+            function setBlock(pos, type) {
+                map[pos.y][pos.x] = type;
+            };
+
+            function drawPills(ctx) { 
+                if (++pillSize > 30) {
+                    pillSize = 0;
+                }
+                
+                for (i = 0; i < height; i += 1) {
+                    for (j = 0; j < width; j += 1) {
+                        if (map[i][j] === Pacman.PILL) {
+                            ctx.beginPath();
+
+                            ctx.clearRect((j * blockSize), (i * blockSize), 
+                                         blockSize, blockSize);
+
+                            ctx.fillStyle = (j < 9.5) ? "#d11d58" : "#ffc100";
+                            ctx.arc((j * blockSize) + blockSize / 2,
+                                    (i * blockSize) + blockSize / 2,
+                                    Math.abs(5 - (pillSize/3)), 
+                                    0, 
+                                    Math.PI * 2, false); 
+                            ctx.fill();
+                            ctx.closePath();
+                        }
+                    }
+                }
+            };
+            
+            function draw(ctx) {
+                var i, j, size = blockSize;
+
+                ctx.clearRect(0, 0, width * size, height * size);
+
+                drawWall(ctx);
+                
+                for (i = 0; i < height; i += 1) {
+                    for (j = 0; j < width; j += 1) {
+                        drawBlock(i, j, ctx);
+                    }
+                }
+            };
+            
+            function drawBlock(y, x, ctx) {
+                var layout = map[y][x];
+
+                if (layout === Pacman.PILL) {
+                    return;
+                }
+
+                ctx.beginPath();
+                
+                if (layout === Pacman.EMPTY || layout === Pacman.BLOCK || 
+                    layout === Pacman.BISCUIT) {
+                    
+                    ctx.clearRect((x * blockSize), (y * blockSize), 
+                                 blockSize, blockSize);
+
+                    if (layout === Pacman.BISCUIT) {
+                        ctx.fillStyle = "#FFF";
+                        ctx.fillRect((x * blockSize) + (blockSize / 2.5), 
+                                     (y * blockSize) + (blockSize / 2.5), 
+                                     blockSize / 6, blockSize / 6);
+                    }
+                }
+                ctx.closePath();     
+            };
+
+             function dibujarMurosDesdeCache(destCtx, sx, sy, sw, sh) {
+                destCtx.drawImage(canvasFondo, sx, sy, sw, sh, sx, sy, sw, sh);
+            }
+
+            reset();
+            
+           return {
+                "draw"                : draw,
+                "drawWall"            : drawWall,
+                "drawWallsCached"     : dibujarMurosDesdeCache,
+                "drawBlock"           : drawBlock,
+                "drawPills"           : drawPills,
+                "block"               : block,
+                "setBlock"            : setBlock,
+                "reset"               : reset,
+                "isWallSpace"         : isWall,
+                "isFloorSpace"        : isFloorSpace,
+                "getTotalComestibles" : getTotalComestibles,
+                "height"              : height,
+                "width"               : width,
+                "blockSize"           : blockSize
+            };
+        };
+
+        Pacman.Audio = function(game) {
+            var files          = [], 
+                endEvents      = [],
+                progressEvents = [],
+                playing        = [];
+            
+            function load(name, path, cb) { 
+                var f = files[name] = document.createElement("audio");
+                progressEvents[name] = function(event) { progress(event, name, cb); };
+                
+                f.addEventListener("canplaythrough", progressEvents[name], true);
+                f.setAttribute("preload", "true");
+                f.setAttribute("autobuffer", "true");
+                f.setAttribute("src", path);
+                f.pause();        
+            };
+
+            function progress(event, name, callback) { 
+                if (event.loaded === event.total && typeof callback === "function") {
+                    callback();
+                    files[name].removeEventListener("canplaythrough", 
+                                                    progressEvents[name], true);
+                }
+            };
+
+            function disableSound() {
+                for (var i = 0; i < playing.length; i++) {
+                    files[playing[i]].pause();
+                    files[playing[i]].currentTime = 0;
+                }
+                playing = [];
+            };
+
+            function ended(name) { 
+                var i, tmp = [], found = false;
+                files[name].removeEventListener("ended", endEvents[name], true);
+
+                for (i = 0; i < playing.length; i++) {
+                    if (!found && playing[i]) { 
+                        found = true;
+                    } else { 
+                        tmp.push(playing[i]);
+                    }
+                }
+                playing = tmp;
+            };
+
+            function play(name) { 
+                if (!game.soundDisabled()) {
+                    endEvents[name] = function() { ended(name); };
+                    playing.push(name);
+                    files[name].addEventListener("ended", endEvents[name], true);
+                    files[name].play();
+                }
+            };
+
+            function pause() { 
+                for (var i = 0; i < playing.length; i++) {
+                    files[playing[i]].pause();
+                }
+            };
+            
+            function resume() { 
+                for (var i = 0; i < playing.length; i++) {
+                    files[playing[i]].play();
+                }        
+            };
+            
+            return {
+                "disableSound" : disableSound,
+                "load"         : load,
+                "play"         : play,
+                "pause"        : pause,
+                "resume"       : resume
+            };
+        };
+
+        var PACMAN = (function () {
+            var state        = WAITING,
+                audio        = null,
+                ghosts       = [],
+                ghostSpecs   = ["#00FFDE", "#FF0000", "#FFB8DE", "#FFB847"],
+                eatenCount   = 0,
+                level        = 0,
+                tick         = 0,
+                registroTrivia = [],
+                vidaExtraOfrecida = false,
+                juegoCompletado = false,
+                ghostPos, userPos, 
+                stateChanged = true,
+                timerStart   = null,
+                lastTime     = 0,
+                ctx          = null,
+                timer        = null,
+                map          = null,
+                user         = null,
+                stored       = null,
+                imagenVida   = new Image();
+
+                        imagenVida.src = "assets/perrito-dulas.png";
+
+                       
+
+            function getTick() { 
+                return tick;
+            };
+
+            function getLevel() {
+                return level;
+            };
+
+            var modoVelocidadActivadoEn = null;
+            var modoPuntosActivadoEn = null;
+
+            function estaEnModoVelocidad() {
+                return modoVelocidadActivadoEn !== null && (getTick() - modoVelocidadActivadoEn) < (Pacman.FPS * 8);
+            };
+
+            function estaEnModoPuntos() {
+                return modoPuntosActivadoEn !== null && (getTick() - modoPuntosActivadoEn) < (Pacman.FPS * 8);
+            };
+
+            function drawScore(text, position) {
+                ctx.fillStyle = "#FFFFFF";
+                ctx.font      = "12px BDCartoonShoutRegular";
+                ctx.fillText(text, 
+                             (position["new"]["x"] / 10) * map.blockSize, 
+                             ((position["new"]["y"] + 5) / 10) * map.blockSize);
+            }
+            
+            function dialog(text) {
+                ctx.fillStyle = "#FFFF00";
+                ctx.font      = "18px Calibri";
+                var width = ctx.measureText(text).width,
+                    x     = ((map.width * map.blockSize) - width) / 2;        
+                ctx.fillText(text, x, (map.height * 10) + 8);
+            }
+
+            function soundDisabled() {
+                return localStorage["soundDisabled"] === "true";
+            };
+            
+            function startLevel() {        
+                user.resetPosition();
+                for (var i = 0; i < ghosts.length; i += 1) { 
+                    ghosts[i].reset();
+                }
+                audio.play("start");
+                timerStart = tick;
+                setState(COUNTDOWN);
+            }    
+
+            function startNewGame() {
+                setState(WAITING);
+                registroTrivia = [];
+                vidaExtraOfrecida = false;
+                juegoCompletado = false;
+                level = 1;
+                user.reset();
+                map.reset(level);
+                map.draw(ctx);
+                startLevel();
+                actualizarAmigosJaula();
+            }
+
+            function keyDown(e) {
+    // Si el jugador está escribiendo en una casilla de texto (nombre, correo, celular),
+    // no interpretamos la tecla como un comando del juego.
+    
+    var elementoActivo = document.activeElement;
+    if (elementoActivo && (elementoActivo.tagName === "INPUT" || elementoActivo.tagName === "TEXTAREA" || elementoActivo.tagName === "SELECT")) {
+        return true;
+    }
+
+    var trivia = document.getElementById("triviaModal");
+    if (trivia && trivia.style.display === "flex") {
+        return true;
+    }
+
+    var formularioFinal = document.getElementById("gameOverModal");
+    if (formularioFinal && formularioFinal.style.display === "flex") {
+        return true;
+    }
+
+    var oferta = document.getElementById("ofertaTriviaModal");
+    if (oferta && oferta.style.display === "flex") {
+        return true;
+    }
+
+    var vidaExtra = document.getElementById("vidaExtraModal");
+    if (vidaExtra && vidaExtra.style.display === "flex") {
+        return true;
+    }
+
+    var premio = document.getElementById("premioModal");
+    if (premio && premio.style.display === "flex") {
+        return true;
+    }
+
+    var victoria = document.getElementById("victoriaModal");
+    if (victoria && victoria.style.display === "flex") {
+        return true;
+    }
+
+    var ilustracion = document.getElementById("ilustracionModal");
+    if (ilustracion && ilustracion.style.display === "flex") {
+        return true;
+    }
+
+        var celebracion = document.getElementById("celebracionModal");
+    if (celebracion && celebracion.style.display === "flex") {
+        return true;
+    }
+
+    var registro = document.getElementById("registroModal");
+    if (registro && registro.style.display === "flex") {
+        return true;
+    }
+
+    var inicioSNES = document.getElementById("pantallaInicioSNES");
+    if (inicioSNES && inicioSNES.style.display !== "none") {
+        return true;
+    }
+
+                if (e.keyCode === KEY.N) {
+                    startNewGame();
+                } else if (e.keyCode === KEY.S) {
+                    audio.disableSound();
+                    localStorage["soundDisabled"] = !soundDisabled();
+                } else if (e.keyCode === KEY.P && state === PAUSE) {
+                    audio.resume();
+                    map.draw(ctx);
+                    setState(stored);
+                } else if (e.keyCode === KEY.P) {
+                    stored = state;
+                    setState(PAUSE);
+                    audio.pause();
+                    map.draw(ctx);
+                    dialog("Paused");
+                } else if (state !== PAUSE) {   
+                    return user.keyDown(e);
+                }
+                return true;
+            }    
+
+            var preguntasDisponibles = [];
+
+            function mezclarArray(arr) {
+                var copia = arr.slice();
+                for (var i = copia.length - 1; i > 0; i--) {
+                    var j = Math.floor(Math.random() * (i + 1));
+                    var temp = copia[i];
+                    copia[i] = copia[j];
+                    copia[j] = temp;
+                }
+                return copia;
+            }
+
+            function obtenerSiguientePregunta() {
+                if (preguntasDisponibles.length === 0) {
+                    preguntasDisponibles = mezclarArray(preguntasTrivia);
+                }
+                return preguntasDisponibles.pop();
+            }
+
+            var preguntasTrivia = [
+                { pregunta: "¿El Plan Delta tiene acceso directo a 16 especialidades?", respuesta: true },
+                { pregunta: "¿La telemedicina en el Plan Delta solo funciona en horario laboral?", respuesta: false },
+                { pregunta: "¿La cobertura de maternidad hace parte del Plan Alfa y Gama?", respuesta: false },
+                { pregunta: "¿Las urgencias en el Plan Delta aplican desde el primer día?", respuesta: true },
+                { pregunta: "¿El Plan Delta ofrece medicina general por acceso directo?", respuesta: true },
+                { pregunta: "¿El Plan Delta cubre terapias alternativas?", respuesta: true },
+                { pregunta: "¿En el Plan Alfa se ofrece la cobertura Bebé en Gestación?", respuesta: false },
+                { pregunta: "¿La urgencia odontológica en el Plan Delta aplica desde el primer día?", respuesta: true },
+                { pregunta: "¿La cirugía ambulatoria programada en el Plan Delta aplica desde el primer día?", respuesta: false },
+                { pregunta: "¿El Plan Delta cubre asistencia en viaje hasta por 10 días al año?", respuesta: true },
+                { pregunta: "¿El Plan Delta cubre patologías preexistentes declaradas?", respuesta: false },
+                { pregunta: "¿El Plan Delta cubre habitación individual durante 90 días?", respuesta: true },
+                { pregunta: "¿El Plan Delta ofrece 40 terapias físicas anuales bajo pertinencia médica?", respuesta: true },
+                { pregunta: "¿El Plan delta posee cobertura para hospitalización domiciliaria bajo pertinencia médica?", respuesta: true },
+                { pregunta: "¿El Plan Gama tiene acceso directo a 16 especialidades?", respuesta: true },
+                { pregunta: "¿La telemedicina en el Plan Gama está disponible 24/7?", respuesta: true },
+                { pregunta: "¿El Plan Gama cubre consulta domiciliaria?", respuesta: true },
+                { pregunta: "¿Un periodo de carencia es el tiempo ininterrumpido mínimo para acceder a ciertas coberturas de servicios?", respuesta: true },
+                { pregunta: "¿El Plan Gama ofrece 30 terapias domiciliarias anuales?", respuesta: true },
+                { pregunta: "¿EL periodo de carencia de las ayudas diagnósticas especializadas en el Plan Gama es apartir del primer día del mes 4?", respuesta: true },
+                { pregunta: "¿Las cirugías básicas en el Plan Gama no tienen carencia y aplican desde el inicio?", respuesta: false },
+                { pregunta: "¿El Plan Gama excluye las urgencias?", respuesta: false },
+                { pregunta: "¿El Plan Gama cubre medicamentos ambulatorios?", respuesta: false },
+                { pregunta: "¿El Plan Gama cubre habitación individual hasta por 50 días al año?", respuesta: true },
+                { pregunta: "¿La odontología general en el Plan Gama aplica desde el primer día?", respuesta: true },
+                { pregunta: "¿El Plan Gama cubre procedimientos de fertilidad?", respuesta: false },
+                { pregunta: "¿El Plan Complementario cubre médicamentos?", respuesta: false },
+                { pregunta: "¿Psicología tiene acceso directo en el Plan Gama?", respuesta: true },
+                { pregunta: "¿La ortodoncia está incluida en el Plan Gama?", respuesta: false },
+                { pregunta: "¿El Plan Gama tiene cobertura nacional en 14 ciudades?", respuesta: true },
+                { pregunta: "¿El Plan Alfa tiene acceso directo a 16 especialidades?", respuesta: false },
+                { pregunta: "¿El Plan Alfa incluye medicina interna y homeopatía por acceso directo?", respuesta: true },
+                { pregunta: "¿El Plan Alfa cubre parto desde el primer día?", respuesta: false },
+                { pregunta: "¿El Plan Alfa ofrece 10 terapias domiciliarias al año bajo pertinencia médica?", respuesta: true },
+                { pregunta: "¿El Plan Alfa incluye ayudas diagnósticas desde el primer día?", respuesta: false },
+                { pregunta: "¿La cirugía menor está incluida desde el primer día en el Plan Alfa?", respuesta: false },
+                { pregunta: "¿La telemedicina en el Plan Alfa está activa 24/7 desde el primer día?", respuesta: true },
+                { pregunta: "¿El Plan Alfa excluye diálisis crónica y VIH?", respuesta: true },
+                { pregunta: "¿La odontología está incluida en el Plan Alfa?", respuesta: false },
+                { pregunta: "¿Para adquirir el Plan Alfa se requiere auditoría médica?", respuesta: false },
+                { pregunta: "¿El Plan Alfa cubre habitación individual desde el primer día?", respuesta: false },
+                { pregunta: "¿Al tener un Plan Complementario me atienden prioritariamente en urgencias?", respuesta: false },
+                { pregunta: "¿El Plan Alfa incluye terapias alternativas?", respuesta: false },
+                { pregunta: "¿Los Planes complementarios Delta, Gama y Alfa son adicionales al PBS?", respuesta: true },
+                { pregunta: "¿El Plan Alfa ofrece telemedicina desde el primer día?", respuesta: true },
+                { pregunta: "¿Los Planes Delta, Gama y Alfa pertenecen a Salud Total EPS-S?", respuesta: true },
+                { pregunta: "¿Los Planes Complementarios requieren afiliación previa al PBS?", respuesta: true },
+                { pregunta: "¿Las consultas de especialidades con acceso directo en el Plan Delta no requieren pago moderador en los CIA?", respuesta: true },
+                { pregunta: "¿La sigla CIA significa “Centro Integral de Atención”?", respuesta: true },
+                { pregunta: "¿El médico domiciliario puede tardar hasta 24 horas en llegar desde el momento de la solicitud?", respuesta: false },
+                { pregunta: "¿Odontopediatría y Optometría son especialidades de acceso directo en el Plan Delta?", respuesta: true },
+                { pregunta: "¿El pago moderador en consultas médicas del Plan Delta en los CIA es de $0?", respuesta: true },
+                { pregunta: "¿El beneficio de Telemedicina del PAC está disponible 24/7 y se accede sin pagos moderadores?", respuesta: true },
+                { pregunta: "La auditoría médica tiene como objetivo principal evaluar la calidad de la atención en salud y el cumplimiento de las guías y protocolos establecidos.", respuesta: false },
+                { pregunta: "¿El Plan Alfa cubre hospitalización y cirugía?", respuesta: false },
+                { pregunta: "Las citas de acceso directo pueden tomar hasta 11 días habiles", respuesta: false },
+                { pregunta: "¿Es cierto que este año los Planes Complementarios PAC cumplen 10 años complementando la salud de las familias colombianas?", respuesta: false }
+            ];
+
+            function mostrarPreguntaVidaExtra() {
+                var preguntaActual = obtenerSiguientePregunta();
+                var yaRespondido = false;
+                var tiempoRestante = 20;
+
+                document.getElementById("vidaPregunta").innerText = preguntaActual.pregunta;
+                document.getElementById("vidaTimer").innerText = "Tiempo restante: " + tiempoRestante + "s";
+                document.getElementById("vidaExtraModal").style.display = "flex";
+
+                var intervalo = setInterval(function() {
+                    tiempoRestante--;
+                    document.getElementById("vidaTimer").innerText = "Tiempo restante: " + tiempoRestante + "s";
+
+                    if (tiempoRestante <= 0) {
+                        clearInterval(intervalo);
+                        if (!yaRespondido) {
+                            yaRespondido = true;
+                            document.getElementById("vidaExtraModal").style.display = "none";
+                            registroTrivia.push({ tipo: "vida", pregunta: preguntaActual.pregunta, resultado: "sinTiempo" });
+                            alert("¡Se acabó el tiempo! No se otorgó la vida extra.");
+                            mostrarFormularioFinal();
+                        }
+                    }
+                }, 1000);
+
+                function responder(respuestaJugador) {
+                    if (yaRespondido) { return; }
+                    yaRespondido = true;
+                    clearInterval(intervalo);
+                    document.getElementById("vidaExtraModal").style.display = "none";
+
+                    if (respuestaJugador === preguntaActual.respuesta) {
+                        registroTrivia.push({ tipo: "vida", pregunta: preguntaActual.pregunta, resultado: "correcta" });
+                        alert("¡Correcto! Ganaste una vida extra.");
+                        user.addLife();
+                        setState(WAITING);
+                        startLevel();
+                    } else {
+                        registroTrivia.push({ tipo: "vida", pregunta: preguntaActual.pregunta, resultado: "incorrecta" });
+                        alert("Respuesta incorrecta. No se otorgó la vida extra.");
+                        mostrarFormularioFinal();
+                    }
+                }
+
+                document.getElementById("btnVidaVerdadero").onclick = function() { responder(true); };
+                document.getElementById("btnVidaFalso").onclick = function() { responder(false); };
+            }
+
+            function mostrarFormularioFinal() {
+                var puntajeFinal = user.theScore();
+
+                document.getElementById("ofertaTriviaModal").style.display = "flex";
+
+                document.getElementById("btnAceptarTrivia").onclick = function() {
+                    document.getElementById("ofertaTriviaModal").style.display = "none";
+                    mostrarPreguntaTrivia(puntajeFinal);
+                };
+
+                document.getElementById("btnRechazarTrivia").onclick = function() {
+                    document.getElementById("ofertaTriviaModal").style.display = "none";
+                    mostrarFormularioGuardado(puntajeFinal);
+                };
+            }
+
+            function mostrarPreguntaTrivia(puntajeFinal) {
+                var preguntaActual = obtenerSiguientePregunta();
+                var yaRespondido = false;
+                var tiempoRestante = 20;
+
+                document.getElementById("triviaPregunta").innerText = preguntaActual.pregunta;
+                document.getElementById("triviaTimer").innerText = "Tiempo restante: " + tiempoRestante + "s";
+                document.getElementById("triviaModal").style.display = "flex";
+
+                var intervalo = setInterval(function() {
+                    tiempoRestante--;
+                    document.getElementById("triviaTimer").innerText = "Tiempo restante: " + tiempoRestante + "s";
+
+                    if (tiempoRestante <= 0) {
+                        clearInterval(intervalo);
+                        if (!yaRespondido) {
+                            yaRespondido = true;
+                            document.getElementById("triviaModal").style.display = "none";
+                            registroTrivia.push({ tipo: "puntos", pregunta: preguntaActual.pregunta, resultado: "sinTiempo" });
+                            var puntajePenalizado = Math.floor(puntajeFinal / 2);
+                            alert("¡Se acabó el tiempo! Tu puntaje se redujo a la mitad: " + puntajePenalizado);
+                            mostrarFormularioGuardado(puntajePenalizado);
+                        }
+                    }
+                }, 1000);
+
+                function responder(respuestaJugador) {
+                    if (yaRespondido) { return; }
+                    yaRespondido = true;
+                    clearInterval(intervalo);
+                    document.getElementById("triviaModal").style.display = "none";
+                    var puntajeDefinitivo = puntajeFinal;
+
+                    if (respuestaJugador === preguntaActual.respuesta) {
+                        registroTrivia.push({ tipo: "puntos", pregunta: preguntaActual.pregunta, resultado: "correcta" });
+                        puntajeDefinitivo = puntajeFinal * 2;
+                        alert("¡Correcto! Tu puntaje se duplicó a " + puntajeDefinitivo);
+                    } else {
+                        registroTrivia.push({ tipo: "puntos", pregunta: preguntaActual.pregunta, resultado: "incorrecta" });
+                        puntajeDefinitivo = Math.floor(puntajeFinal / 2);
+                        alert("Respuesta incorrecta. Tu puntaje se redujo a la mitad: " + puntajeDefinitivo);
+                    }
+
+                    mostrarFormularioGuardado(puntajeDefinitivo);
+                }
+
+                document.getElementById("btnVerdadero").onclick = function() { responder(true); };
+                document.getElementById("btnFalso").onclick = function() { responder(false); };
+            }
+
+                        async function mostrarFormularioGuardado(puntajeFinal) {
+                document.getElementById("finalScore").innerText = puntajeFinal;
+                document.getElementById("gameOverModal").dataset.puntaje = puntajeFinal;
+
+                var imagenDerrota = document.getElementById("imagenDerrotaMultiplicador");
+                var textoDerrota = document.getElementById("textoDerrotaMultiplicador");
+
+                if (!juegoCompletado) {
+                    imagenDerrota.style.display = "block";
+                    textoDerrota.style.display = "block";
+                } else {
+                    imagenDerrota.style.display = "none";
+                    textoDerrota.style.display = "none";
+                }
+
+                document.getElementById("mensajeGuardado").style.display = "none";
+
+                try {
+                    await window.guardarPuntaje(
+                        window.datosJugador.nombre,
+                        window.datosJugador.sucursal,
+                        window.datosJugador.tipoParticipacion,
+                        window.datosJugador.equipo,
+                        puntajeFinal,
+                        registroTrivia
+                    );
+                    document.getElementById("mensajeGuardado").style.display = "block";
+                } catch (error) {
+                    console.error("No se pudo guardar el puntaje automáticamente:", error);
+                }
+
+                if (puntajeFinal >= 28000) {
+                    document.getElementById("premioNombre").value = window.datosJugador.nombre;
+                    var selPremio = document.getElementById("premioSucursal");
+                    for (var i = 0; i < selPremio.options.length; i++) {
+                        if (selPremio.options[i].value === window.datosJugador.sucursal) {
+                            selPremio.selectedIndex = i;
+                        }
+                    }
+                    document.getElementById("premioModal").style.display = "flex";
+                } else {
+                    document.getElementById("gameOverModal").style.display = "flex";
+                }
+            }
+
+            function forzarMayusculasCampo(id) {
+                var campo = document.getElementById(id);
+                campo.addEventListener("input", function () {
+                    var posicion = campo.selectionStart;
+                    campo.value = campo.value.toUpperCase();
+                    campo.setSelectionRange(posicion, posicion);
+                });
+            }
+
+            function mostrarFormularioGuardadoReal() {
+                document.getElementById("gameOverModal").style.display = "flex";
+            }
+
+            function loseLife() {        
+                setState(WAITING);
+                user.loseLife();
+                if (user.getLives() > 0) {
+                    startLevel();
+                } else if (!vidaExtraOfrecida) {
+                    vidaExtraOfrecida = true;
+                    mostrarPreguntaVidaExtra();
+                } else {
+                    mostrarFormularioFinal();
+                }
+            }
+            
+            function setState(nState) { 
+                state = nState;
+                stateChanged = true;
+            };
+            
+            function collided(user, ghost) {
+                return (Math.sqrt(Math.pow(ghost.x - user.x, 2) + 
+                                  Math.pow(ghost.y - user.y, 2))) < 10;
+            };
+
+            function drawFooter() {
+                var topLeft  = (map.height * map.blockSize),
+                    textBase = topLeft + 17;
+                
+                ctx.fillStyle = "#FFFF00";
+
+                for (var i = 0, len = user.getLives(); i < len; i++) {
+                    var cxVida = 150 + (25 * i) + map.blockSize / 2,
+                        cyVida = (topLeft+1) + map.blockSize / 2;
+
+                    if (imagenVida.complete && imagenVida.naturalWidth > 0) {
+                        var tamanoVida = map.blockSize * 1.4;
+                        ctx.drawImage(imagenVida, cxVida - tamanoVida / 2, cyVida - tamanoVida / 2, tamanoVida, tamanoVida);
+                        continue;
+                    }
+
+                    ctx.fillStyle = "#FFFF00";
+                    ctx.beginPath();
+                    ctx.moveTo(cxVida, cyVida);
+                    
+                    ctx.arc(cxVida, cyVida,
+                            map.blockSize / 2, Math.PI * 0.25, Math.PI * 1.75, false);
+                    ctx.fill();
+                }
+
+                ctx.fillStyle = !soundDisabled() ? "#00FF00" : "#FF0000";
+                ctx.font = "bold 16px sans-serif";
+                ctx.fillText("s", 10, textBase);
+
+                ctx.fillStyle = "#FFFF00";
+                ctx.font      = "14px Calibri";
+                ctx.fillText("Score: " + user.theScore(), 30, textBase);
+                ctx.fillText("Level: " + level, 260, textBase);
+            }
+
+             function redrawBlock(pos) {
+                var filaBase = Math.floor(pos.y/10);
+                var colBase  = Math.floor(pos.x/10);
+
+                var filaInicio = Math.max(0, filaBase - 2);
+                var filaFin    = Math.min(map.height - 1, filaBase + 2);
+                var colInicio  = Math.max(0, colBase - 2);
+                var colFin     = Math.min(map.width - 1, colBase + 2);
+
+                var s = map.blockSize;
+                var zonaX = colInicio * s;
+                var zonaY = filaInicio * s;
+                var zonaAncho = (colFin - colInicio + 1) * s;
+                var zonaAlto  = (filaFin - filaInicio + 1) * s;
+
+                ctx.clearRect(zonaX, zonaY, zonaAncho, zonaAlto);
+
+                for (var fila = filaInicio; fila <= filaFin; fila++) {
+                    for (var col = colInicio; col <= colFin; col++) {
+                        map.drawBlock(fila, col, ctx);
+                    }
+                }
+
+                map.drawWallsCached(ctx, zonaX, zonaY, zonaAncho, zonaAlto);
+            }
+
+            function mainDraw() { 
+                var diff, u, i, len, nScore;
+                
+                ghostPos = [];
+
+                for (i = 0, len = ghosts.length; i < len; i += 1) {
+                    ghostPos.push(ghosts[i].move(ctx));
+                }
+                u = user.move(ctx);
+                
+                for (i = 0, len = ghosts.length; i < len; i += 1) {
+                    redrawBlock(ghostPos[i].old);
+                }
+                redrawBlock(u.old);
+                
+                for (i = 0, len = ghosts.length; i < len; i += 1) {
+                    ghosts[i].draw(ctx);
+                }                    
+                user.draw(ctx);
+                
+                userPos = u["new"];
+                
+                for (i = 0, len = ghosts.length; i < len; i += 1) {
+                    if (collided(userPos, ghostPos[i]["new"])) {
+                        if (ghosts[i].isVunerable()) { 
+                            audio.play("eatghost");
+                            ghosts[i].eat();
+                            eatenCount += 1;
+                            nScore = eatenCount * 50 * (estaEnModoPuntos() ? 2 : 1);
+                            drawScore(nScore, ghostPos[i]);
+                            user.addScore(nScore);                    
+                            setState(EATEN_PAUSE);
+                            timerStart = tick;
+                        } else if (ghosts[i].isDangerous()) {
+                            audio.play("die");
+                            setState(DYING);
+                            timerStart = tick;
+                        }
+                    }
+                }                            
+            };
+
+            function mainLoop() {
+                var diff;
+
+                if (state !== PAUSE) { 
+                    ++tick;
+                }
+
+                var topLeftLimpieza = (map.height * map.blockSize);
+                ctx.clearRect(0, topLeftLimpieza, (map.width * map.blockSize), 30);
+
+                map.drawPills(ctx);
+
+                if (state === PLAYING) {
+                    mainDraw();
+                } else if (state === WAITING && stateChanged) {            
+                    stateChanged = false;
+                    map.draw(ctx);           
+                } else if (state === EATEN_PAUSE && 
+                           (tick - timerStart) > (Pacman.FPS / 3)) {
+                    map.draw(ctx);
+                    setState(PLAYING);
+                } else if (state === DYING) {
+                    if (tick - timerStart > (Pacman.FPS * 2)) { 
+                        loseLife();
+                    } else { 
+                        redrawBlock(userPos);
+                        for (i = 0, len = ghosts.length; i < len; i += 1) {
+                            redrawBlock(ghostPos[i].old);
+                            ghostPos.push(ghosts[i].draw(ctx));
+                        }                                   
+                        user.drawDead(ctx, (tick - timerStart) / (Pacman.FPS * 2));
+                    }
+                } else if (state === COUNTDOWN) {
+                    diff = 5 + Math.floor((timerStart - tick) / Pacman.FPS);
+                    
+                    if (diff === 0) {
+                        map.draw(ctx);
+                        setState(PLAYING);
+                    } else {
+                        if (diff !== lastTime) { 
+                            lastTime = diff;
+                            map.draw(ctx);
+                            dialog("Starting in: " + diff);
+                        }
+                    }
+                } 
+
+                drawFooter();   
+            }
+
+            function eatenPill(esPildoraDeVelocidad) {
+                audio.play("eatpill");
+                timerStart = tick;
+                eatenCount = 0;
+                if (esPildoraDeVelocidad) {
+                    modoVelocidadActivadoEn = tick;
+                } else {
+                    modoPuntosActivadoEn = tick;
+                }
+                for (i = 0; i < ghosts.length; i += 1) {
+                    ghosts[i].makeEatable(ctx);
+                }        
+            };
+            
+            var ilustracionesPorNivel = {
+                1: {
+                    imagen: "assets/rescate-nivel1.png",
+                    titulo: "¡Rescataste a tu primer amigo!",
+                    texto: "Dulas sigue su camino para salvar al resto de sus amigos de los fantasmas."
+                },
+                2: {
+                    imagen: "assets/rescate-nivel2.png",
+                    titulo: "¡Rescataste a otro amigo!",
+                    texto: "Cada vez quedan menos fantasmas entre Dulas y sus amigos."
+                },
+                3: {
+                    imagen: "assets/rescate-nivel3.png",
+                    titulo: "¡Rescataste al último amigo!",
+                    texto: "Dulas por fin reunió a todos sus amigos, lejos de los fantasmas."
+                }
+            };
+
+            function actualizarAmigosJaula() {
+                for (var n = 1; n <= 3; n++) {
+                    if (imagenesAmigosJaulaDOM[n]) {
+                        imagenesAmigosJaulaDOM[n].style.display = (level > n) ? "none" : "block";
+                    }
+                }
+            }
+
+                function obtenerHoraBogota() {
+                var ahora = new Date();
+                var opciones = { timeZone: "America/Bogota", hour12: false, weekday: "short", hour: "2-digit", minute: "2-digit" };
+                var partes = new Intl.DateTimeFormat("en-US", opciones).formatToParts(ahora);
+                var mapa = {};
+                partes.forEach(function (p) { mapa[p.type] = p.value; });
+                return { diaSemana: mapa.weekday, hora: parseInt(mapa.hour, 10), minuto: parseInt(mapa.minute, 10) };
+            }
+
+                function esHorarioPermitido() {
+                return true; // TEMPORAL: quitar esta línea para reactivar la restricción de horario
+
+                if (window.modoPruebaSinHorarioGlobal) {
+                    return true;
+                }
+
+                var info = obtenerHoraBogota();
+
+                if (info.diaSemana === "Sat" || info.diaSemana === "Sun") {
+                    return true;
+                }
+
+                var minutosDelDia = (info.hora * 60) + info.minuto;
+                var enHorarioAlmuerzo = minutosDelDia >= (12 * 60) && minutosDelDia < (14 * 60);
+                var fueraDeJornada = minutosDelDia >= (17 * 60) || minutosDelDia < (7 * 60);
+
+                return enHorarioAlmuerzo || fueraDeJornada;
+            }
+
+            function bloquearJuegoPorHorario() {
+                document.getElementById("gameOverModal").style.display = "none";
+                document.getElementById("premioModal").style.display = "none";
+                document.getElementById("pantallaBloqueada").style.display = "flex";
+            }
+
+            function avanzarSiguienteNivel() {
+                level += 1;
+                map.reset(level);
+                user.newLevel();
+                startLevel();
+                actualizarAmigosJaula();
+            }
+
+            function completedLevel() {
+                var nivelCompletado = level;
+                setState(WAITING);
+
+                var esUltimoNivel = (nivelCompletado >= 3);
+                var datosIlustracion = ilustracionesPorNivel[nivelCompletado];
+
+                if (esUltimoNivel) {
+                    juegoCompletado = true;
+                }
+
+                if (datosIlustracion) {
+                    document.getElementById("ilustracionImagen").src = datosIlustracion.imagen;
+                    document.getElementById("ilustracionTitulo").innerText = datosIlustracion.titulo;
+                    document.getElementById("ilustracionTexto").innerText = datosIlustracion.texto;
+                    document.getElementById("ilustracionModal").dataset.esFinal = esUltimoNivel ? "true" : "false";
+                    document.getElementById("ilustracionModal").style.display = "flex";
+                } else if (esUltimoNivel) {
+                    document.getElementById("victoriaModal").style.display = "flex";
+                } else {
+                    avanzarSiguienteNivel();
+                }
+            };
+
+            function keyPress(e) { 
+                if (state !== WAITING && state !== PAUSE) { 
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            };
+            
+            var imagenesAmigosJaulaDOM = {};
+
+            function init(wrapper, root) {
+                var i, len, ghost,
+                    blockSize = wrapper.offsetWidth / 19,
+                    canvas    = document.createElement("canvas");
+                
+                canvas.setAttribute("width", (blockSize * 19) + "px");
+                canvas.setAttribute("height", (blockSize * 22) + 30 + "px");
+
+                wrapper.style.position = "relative";
+                wrapper.appendChild(canvas);
+
+                var posicionesJaula = {
+                    1: { x: 80,  y: 100 },
+                    2: { x: 90,  y: 100 },
+                    3: { x: 100, y: 100 }
+                };
+
+                for (var numAmigo = 1; numAmigo <= 3; numAmigo++) {
+                    var imgAmigo = document.createElement("img");
+                    imgAmigo.src = "assets/amigo-jaula-nivel" + numAmigo + ".gif";
+                    imgAmigo.onerror = function () { this.style.display = "none"; };
+                    imgAmigo.style.position = "absolute";
+                    imgAmigo.style.pointerEvents = "none";
+                    imgAmigo.style.width = (blockSize * 1.3) + "px";
+                    imgAmigo.style.left = (((posicionesJaula[numAmigo].x / 10) * blockSize) + (blockSize / 2)) + "px";
+                    imgAmigo.style.top  = (((posicionesJaula[numAmigo].y / 10) * blockSize) + (blockSize / 2)) + "px";
+                    imgAmigo.style.transform = "translate(-50%, -50%)";
+                    imgAmigo.style.zIndex = "5";
+
+                    wrapper.appendChild(imgAmigo);
+                    imagenesAmigosJaulaDOM[numAmigo] = imgAmigo;
+                }
+
+                ctx  = canvas.getContext('2d');
+
+                audio = new Pacman.Audio({"soundDisabled":soundDisabled});
+                map   = new Pacman.Map(blockSize);
+                user  = new Pacman.User({ 
+                    "completedLevel"      : completedLevel, 
+                    "eatenPill"           : eatenPill,
+                    "getLevel"            : getLevel,
+                    "estaEnModoVelocidad" : estaEnModoVelocidad,
+                    "estaEnModoPuntos"    : estaEnModoPuntos
+                }, map);
+
+                for (i = 0, len = ghostSpecs.length; i < len; i += 1) {
+                    ghost = new Pacman.Ghost({"getTick":getTick, "getLevel":getLevel}, map, ghostSpecs[i]);
+                    ghosts.push(ghost);
+                }
+                
+                map.draw(ctx);
+                dialog("Loading ...");
+
+                var extension = Modernizr.audio.ogg ? 'ogg' : 'mp3';
+
+                var audio_files = [
+                    ["start", root + "audio/opening_song." + extension],
+                    ["die", root + "audio/die." + extension],
+                    ["eatghost", root + "audio/eatghost." + extension],
+                    ["eatpill", root + "audio/eatpill." + extension],
+                    ["eating", root + "audio/eating.short." + extension],
+                    ["eating2", root + "audio/eating.short." + extension]
+                ];
+
+                load(audio_files, function() { loaded(); });
+            };
+
+            function load(arr, callback) { 
+                if (arr.length === 0) { 
+                    callback();
+                } else { 
+                    var x = arr.pop();
+                    audio.load(x[0], x[1], function() { load(arr, callback); });
+                }
+            };
+                
+                        function loaded() {
+                document.addEventListener("keydown", keyDown, true);
+                document.addEventListener("keypress", keyPress, true);
+
+                var CODIGO_PRUEBA_HORARIO = "DULAS2026TEST";
+
+                var botonInvisible = document.createElement("div");
+                botonInvisible.style.position = "fixed";
+                botonInvisible.style.top = "0";
+                botonInvisible.style.left = "0";
+                botonInvisible.style.width = "40px";
+                botonInvisible.style.height = "40px";
+                botonInvisible.style.zIndex = "99999";
+                botonInvisible.style.cursor = "default";
+                botonInvisible.addEventListener("click", function () {
+                    var codigoIngresado = window.prompt("Código de acceso:");
+                    if (codigoIngresado === CODIGO_PRUEBA_HORARIO) {
+                        window.modoPruebaSinHorarioGlobal = true;
+                        document.getElementById("pantallaBloqueada").style.display = "none";
+                        document.getElementById("pantallaClickInicial").style.display = "flex";
+                    }
+                });
+                document.body.appendChild(botonInvisible);
+
+                if (!esHorarioPermitido()) {
+                    document.getElementById("pantallaClickInicial").style.display = "none";
+                    document.getElementById("pantallaBloqueada").style.display = "flex";
+                }
+
+                forzarMayusculasCampo("premioNombre");
+                forzarMayusculasCampo("premioArea");
+                forzarMayusculasCampo("premioCargo");
+
+                    document.getElementById("btnReclamarPremio").addEventListener("click", async function () {
+                    if (!esHorarioPermitido()) {
+                        bloquearJuegoPorHorario();
+                        return;
+                    }
+
+                    var nombre = document.getElementById("premioNombre").value.trim();
+                    var sucursal = document.getElementById("premioSucursal").value;
+                    var area = document.getElementById("premioArea").value.trim();
+                    var cargo = document.getElementById("premioCargo").value.trim();
+
+                    if (!nombre || !sucursal || !area || !cargo) {
+                        alert("Por favor completa todos los campos para reclamar tu premio.");
+                        return;
+                    }
+
+                    var btn = document.getElementById("btnReclamarPremio");
+                    btn.innerText = "Guardando...";
+                    btn.disabled = true;
+
+                    try {
+                        await window.guardarPremio(nombre, sucursal, area, cargo, Number(document.getElementById("gameOverModal").dataset.puntaje));
+                        alert("¡Premio registrado! Nos pondremos en contacto para la entrega.");
+
+                        document.getElementById("premioModal").style.display = "none";
+                        document.getElementById("premioNombre").value = "";
+                        document.getElementById("premioSucursal").selectedIndex = 0;
+                        document.getElementById("premioArea").value = "";
+                        document.getElementById("premioCargo").value = "";
+
+                        mostrarFormularioGuardadoReal();
+                    } catch (error) {
+                        alert("Hubo un error al registrar tu premio. Intenta de nuevo.");
+                    } finally {
+                        btn.innerText = "Reclamar premio";
+                        btn.disabled = false;
+                    }
+                });
+
+                var campoEstrellas = document.getElementById("campoEstrellasSNES");
+                for (var e = 0; e < 60; e += 1) {
+                    var estrella = document.createElement("div");
+                    estrella.className = "estrellaSNES";
+                    estrella.style.left = Math.random() * 100 + "%";
+                    estrella.style.top = Math.random() * 100 + "%";
+                    estrella.style.animationDelay = (Math.random() * 2) + "s";
+                    campoEstrellas.appendChild(estrella);
+                }
+
+                    function iniciarDesdePantallaSNES() {
+                    var pantalla = document.getElementById("pantallaInicioSNES");
+                    if (pantalla.classList.contains("saliendo")) { return; }
+
+                    pantalla.classList.add("saliendo");
+
+                    setTimeout(function () {
+                        pantalla.style.display = "none";
+                        document.body.style.overflow = "";
+
+                        var nombreGuardado = localStorage.getItem("dulasNombreJugador");
+                        if (nombreGuardado) {
+                            document.getElementById("nombreJugador").value = nombreGuardado;
+                        }
+
+                        document.getElementById("registroModal").style.display = "flex";
+                        actualizarEstadoBotonJugar();
+                    }, 600);
+                }
+
+                var animacionSNESLista = false;
+
+                function mostrarPantallaStart() {
+                    document.getElementById("pantallaInicioSNES").style.display = "flex";
+                    document.body.style.overflow = "hidden";
+                    iniciarAnimacionEntradaSNES();
+                }
+
+                function iniciarAnimacionEntradaSNES() {
+                    var boxeador = document.getElementById("boxeadorIntro");
+                    var bacteria = document.getElementById("bacteriaIntro");
+                    var titulo = document.getElementById("tituloSNES");
+                    var destello = document.getElementById("destelloSNES");
+                    var start = document.getElementById("startSNES");
+
+                    animacionSNESLista = false;
+
+                    setTimeout(function () {
+                        boxeador.classList.add("posicionado");
+                    }, 200);
+
+                    setTimeout(function () {
+                        bacteria.classList.add("posicionado");
+                    }, 1000);
+
+                    setTimeout(function () {
+                        titulo.classList.add("posicionado");
+                        document.getElementById("logoIntro").classList.add("mostrar");
+                        document.getElementById("imagenGruposFlotante").classList.add("mostrar");
+                    }, 1900);
+
+                    setTimeout(function () {
+                        destello.classList.add("encender");
+                    }, 2800);
+
+                        setTimeout(function () {
+                        destello.classList.remove("encender");
+                        destello.classList.add("apagar");
+                        start.classList.add("mostrarStart");
+                        document.getElementById("imagenEstaticaAbajo").classList.add("mostrar");
+                        animacionSNESLista = true;
+                    }, 3150);
+                }
+
+                function reproducirIntroCompleta() {
+                    mostrarPantallaStart();
+
+                    var audio = document.getElementById("audioIntro");
+                    setTimeout(function () {
+                        var promesaAudio = audio.play();
+                        if (promesaAudio && promesaAudio.catch) {
+                            promesaAudio.catch(function () {
+                                console.log("El navegador bloqueó el audio automático.");
+                            });
+                        }
+                    }, 1900);
+                }
+
+                document.getElementById("botonClickInicial").addEventListener("click", function () {
+                    var pantallaClick = document.getElementById("pantallaClickInicial");
+                    reproducirIntroCompleta();
+                    pantallaClick.classList.add("ocultando");
+
+                    setTimeout(function () {
+                        pantallaClick.style.display = "none";
+                    }, 500);
+                });
+
+                document.addEventListener("keydown", function (e) {
+                    var pantalla = document.getElementById("pantallaInicioSNES");
+                    if (pantalla.style.display !== "none" && animacionSNESLista && e.keyCode === 13) {
+                        iniciarDesdePantallaSNES();
+                    }
+                });
+
+                document.getElementById("btnContinuarIlustracion").addEventListener("click", function () {
+                    var esFinal = document.getElementById("ilustracionModal").dataset.esFinal === "true";
+                    document.getElementById("ilustracionModal").style.display = "none";
+
+                    if (esFinal) {
+                        document.getElementById("victoriaModal").style.display = "flex";
+                    } else {
+                        avanzarSiguienteNivel();
+                    }
+                });
+
+                document.getElementById("btnContinuarVictoria").addEventListener("click", function () {
+                    document.getElementById("victoriaModal").style.display = "none";
+                    user.addScore(5000);
+                    document.getElementById("celebracionModal").style.display = "flex";
+                });
+
+                document.getElementById("btnContinuarCelebracion").addEventListener("click", function () {
+                    document.getElementById("celebracionModal").style.display = "none";
+                    mostrarFormularioFinal();
+                });
+
+                document.getElementById("jugarDeNuevo").addEventListener("click", function () {
+                    if (!esHorarioPermitido()) {
+                        bloquearJuegoPorHorario();
+                        return;
+                    }
+                    document.getElementById("gameOverModal").style.display = "none";
+                    document.getElementById("mensajeGuardado").style.display = "none";
+                    startNewGame();
+                });
+
+                                function actualizarEstadoBotonJugar() {
+                    var nombre = document.getElementById("nombreJugador").value.trim();
+                    var sucursal = document.getElementById("sucursalJugador").value;
+                    var opcionParticipacion = document.querySelector('input[name="tipoParticipacion"]:checked');
+                    var tipoParticipacion = opcionParticipacion ? opcionParticipacion.value : null;
+                    var equipo = document.getElementById("equipoJugador").value.trim();
+
+                    var completo = nombre && sucursal && tipoParticipacion && (tipoParticipacion !== "Grupal" || equipo);
+
+                    var btn = document.getElementById("btnJugarRegistro");
+                    btn.disabled = !completo;
+                    btn.style.background = completo ? "#4CAF50" : "#555";
+                    btn.style.cursor = completo ? "pointer" : "not-allowed";
+                    btn.innerText = completo ? "¡Jugar! 🎮" : "Completa los datos para jugar";
+                }
+
+                document.getElementById("nombreJugador").addEventListener("input", actualizarEstadoBotonJugar);
+                document.getElementById("sucursalJugador").addEventListener("change", actualizarEstadoBotonJugar);
+                document.getElementById("equipoJugador").addEventListener("input", actualizarEstadoBotonJugar);
+
+                document.getElementById("participacionIndividual").addEventListener("change", function () {
+                    document.getElementById("equipoJugador").style.display = "none";
+                    actualizarEstadoBotonJugar();
+                });
+                document.getElementById("participacionGrupal").addEventListener("change", function () {
+                    document.getElementById("equipoJugador").style.display = "block";
+                    actualizarEstadoBotonJugar();
+                });
+
+                document.getElementById("btnJugarRegistro").addEventListener("click", async function () {
+                    var nombre = document.getElementById("nombreJugador").value.trim();
+                    var sucursal = document.getElementById("sucursalJugador").value;
+                    var opcionParticipacion = document.querySelector('input[name="tipoParticipacion"]:checked');
+                    var tipoParticipacion = opcionParticipacion ? opcionParticipacion.value : null;
+                    var equipo = document.getElementById("equipoJugador").value.trim();
+
+                    if (tipoParticipacion === "Grupal") {
+                        try {
+                            var respuestaVerificacion = await fetch(
+                                AZURE_VERIFICAR_EQUIPO_URL + "?equipo=" + encodeURIComponent(equipo) + "&nombre=" + encodeURIComponent(nombre) + "&sucursal=" + encodeURIComponent(sucursal)
+                            );
+                            var datosVerificacion = await respuestaVerificacion.json();
+
+                            if (datosVerificacion.lleno) {
+                                alert("El equipo \"" + equipo + "\" ya tiene 3 integrantes. No puedes unirte con ese nombre de equipo.");
+                                return;
+                            }
+                        } catch (error) {
+                            console.error("No se pudo verificar el cupo del equipo:", error);
+                        }
+                    }
+
+                    localStorage.setItem("dulasNombreJugador", nombre);
+
+                    window.datosJugador = {
+                        nombre: nombre,
+                        sucursal: sucursal,
+                        tipoParticipacion: tipoParticipacion,
+                        equipo: equipo
+                    };
+
+                    document.getElementById("registroModal").style.display = "none";
+                    startNewGame();
+                });
+
+                function forzarMayusculas(id) {
+                    var campo = document.getElementById(id);
+                    campo.addEventListener("input", function () {
+                        var posicion = campo.selectionStart;
+                        campo.value = campo.value.toUpperCase();
+                        campo.setSelectionRange(posicion, posicion);
+                    });
+                }
+
+                forzarMayusculas("nombreJugador");
+                forzarMayusculas("equipoJugador");
+
+
+                timer = window.setInterval(mainLoop, 1000 / Pacman.FPS);
+            };
+            
+            return {
+                "init" : init
+            };
+        }());
+
+        /* Human readable keyCode index */
+        var KEY = {'BACKSPACE': 8, 'TAB': 9, 'NUM_PAD_CLEAR': 12, 'ENTER': 13, 'SHIFT': 16, 'CTRL': 17, 'ALT': 18, 'PAUSE': 19, 'CAPS_LOCK': 20, 'ESCAPE': 27, 'SPACEBAR': 32, 'PAGE_UP': 33, 'PAGE_DOWN': 34, 'END': 35, 'HOME': 36, 'ARROW_LEFT': 37, 'ARROW_UP': 38, 'ARROW_RIGHT': 39, 'ARROW_DOWN': 40, 'PRINT_SCREEN': 44, 'INSERT': 45, 'DELETE': 46, 'SEMICOLON': 59, 'WINDOWS_LEFT': 91, 'WINDOWS_RIGHT': 92, 'SELECT': 93, 'NUM_PAD_ASTERISK': 106, 'NUM_PAD_PLUS_SIGN': 107, 'NUM_PAD_HYPHEN-MINUS': 109, 'NUM_PAD_FULL_STOP': 110, 'NUM_PAD_SOLIDUS': 111, 'NUM_LOCK': 144, 'SCROLL_LOCK': 145, 'SEMICOLON': 186, 'EQUALS_SIGN': 187, 'COMMA': 188, 'HYPHEN-MINUS': 189, 'FULL_STOP': 190, 'SOLIDUS': 191, 'GRAVE_ACCENT': 192, 'LEFT_SQUARE_BRACKET': 219, 'REVERSE_SOLIDUS': 220, 'RIGHT_SQUARE_BRACKET': 221, 'APOSTROPHE': 222};
+
+        (function () {
+            /* 0 - 9 */
+            for (var i = 48; i <= 57; i++) {
+                KEY['' + (i - 48)] = i;
+            }
+            /* A - Z */
+            for (i = 65; i <= 90; i++) {
+                KEY['' + String.fromCharCode(i)] = i;
+            }
+            /* NUM_PAD_0 - NUM_PAD_9 */
+            for (i = 96; i <= 105; i++) {
+                KEY['NUM_PAD_' + (i - 96)] = i;
+            }
+            /* F1 - F12 */
+            for (i = 112; i <= 123; i++) {
+                KEY['F' + (i - 112 + 1)] = i;
+            }
+        })();
+
+        Pacman.WALL    = 0;
+        Pacman.BISCUIT = 1;
+        Pacman.EMPTY   = 2;
+        Pacman.BLOCK   = 3;
+        Pacman.PILL    = 4;
+
+        Pacman.MAP = [
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+            [0, 4, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 4, 0],
+            [0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0],
+            [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+            [0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0],
+            [0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0],
+            [0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0],
+            [2, 2, 2, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 2, 2, 2],
+            [0, 0, 0, 0, 1, 0, 1, 0, 0, 3, 0, 0, 1, 0, 1, 0, 0, 0, 0],
+            [2, 2, 2, 2, 1, 1, 1, 0, 3, 3, 3, 0, 1, 1, 1, 2, 2, 2, 2],
+            [0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0],
+            [2, 2, 2, 0, 1, 0, 1, 1, 1, 2, 1, 1, 1, 0, 1, 0, 2, 2, 2],
+            [0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0],
+            [0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+            [0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0],
+            [0, 4, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 4, 0],
+            [0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0],
+            [0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0],
+            [0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0],
+            [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        ];
+
+Pacman.MAP_NIVEL_2_3 = [
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0],
+            [0, 4, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 4, 0],
+            [0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0],
+            [0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0],
+            [0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0],
+            [0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0],
+            [0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0],
+            [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+            [0, 0, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+            [2, 2, 2, 2, 2, 1, 0, 3, 3, 3, 3, 3, 0, 1, 2, 2, 2, 2, 2],
+            [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+            [0, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 0],
+            [0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0],
+            [0, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0],
+            [0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0],
+            [0, 1, 0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 0],
+            [0, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0],
+            [0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0],
+            [0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0],
+            [0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        ];
+
+       Pacman.MAP_NIVEL_4_5 = [
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+            [0, 4, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 4, 0],
+            [0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0],
+            [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+            [0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0],
+            [0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0],
+            [0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0],
+            [2, 2, 2, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 2, 2, 2],
+            [0, 0, 0, 0, 1, 0, 1, 0, 0, 3, 0, 0, 1, 0, 1, 0, 0, 0, 0],
+            [2, 2, 2, 2, 1, 1, 1, 0, 3, 3, 3, 0, 1, 1, 1, 2, 2, 2, 2],
+            [0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0],
+            [2, 2, 2, 0, 1, 0, 1, 1, 1, 2, 1, 1, 1, 0, 1, 0, 2, 2, 2],
+            [0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0],
+            [0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+            [0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0],
+            [0, 4, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 4, 0],
+            [0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0],
+            [0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0],
+            [0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0],
+            [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        ];
+
+        Pacman.WALLS_NIVEL_2_3 = [
+            [{"move": [19, 9.5]}, {"line": [16, 9.5]},
+             {"curve": [15.5, 9.5, 15.5, 9]}, {"line": [15.5, 8]},
+             {"curve": [15.5, 7.5, 16, 7.5]}, {"line": [18, 7.5]},
+             {"curve": [18.5, 7.5, 18.5, 7]}, {"line": [18.5, 1]},
+             {"curve": [18.5, 0.5, 18, 0.5]}, {"line": [10, 0.5]},
+             {"curve": [9.5, 0.5, 9.5, 1]}, {"line": [9.5, 3.5]}],
+
+            [{"move": [9.5, 1]},
+             {"curve": [9.5, 0.5, 9, 0.5]}, {"line": [1, 0.5]},
+             {"curve": [0.5, 0.5, 0.5, 1]}, {"line": [0.5, 7]},
+             {"curve": [0.5, 7.5, 1, 7.5]}, {"line": [3, 7.5]},
+             {"curve": [3.5, 7.5, 3.5, 8]}, {"line": [3.5, 9]},
+             {"curve": [3.5, 9.5, 3, 9.5]}, {"line": [0, 9.5]}],
+
+            [{"move": [16.5, 5.5]}, {"line": [15.5, 5.5]}],
+
+            [{"move": [16, 2.5]},
+             {"curve": [15.5, 2.5, 15.5, 3]},
+             {"curve": [15.5, 3.5, 16, 3.5]},
+             {"curve": [16.5, 3.5, 16.5, 3]},
+             {"curve": [16.5, 2.5, 16, 2.5]}],
+
+            [{"move": [3.5, 5.5]}, {"line": [2.5, 5.5]}],
+
+            [{"move": [3, 2.5]}, {"curve": [2.5, 2.5, 2.5, 3]},
+             {"curve": [2.5, 3.5, 3, 3.5]}, {"curve": [3.5, 3.5, 3.5, 3]},
+             {"curve": [3.5, 2.5, 3, 2.5]}],
+
+            [{"move": [13, 2.5]}, {"line": [12, 2.5]}, {"curve": [11.5, 2.5, 11.5, 3]},
+             {"curve": [11.5, 3.5, 12, 3.5]}, {"line": [13, 3.5]},
+             {"curve": [13.5, 3.5, 13.5, 3]}, {"curve": [13.5, 2.5, 13, 2.5]}],
+
+            [{"move": [7, 2.5]}, {"line": [6, 2.5]}, {"curve": [5.5, 2.5, 5.5, 3]},
+             {"curve": [5.5, 3.5, 6, 3.5]}, {"line": [7, 3.5]},
+             {"curve": [7.5, 3.5, 7.5, 3]}, {"curve": [7.5, 2.5, 7, 2.5]}],
+
+            [{"move": [11.5, 5.5]}, {"line": [10, 5.5]}, {"curve": [9.5, 5.5, 9.5, 6]},
+             {"line": [9.5, 7.5]}],
+            [{"move": [9.5, 6]}, {"curve": [9.5, 5.5, 8.5, 5.5]},
+             {"line": [7.5, 5.5]}],
+
+            [{"move": [13.5, 5.5]}, {"line": [13.5, 7]}, {"curve": [13.5, 7.5, 13, 7.5]},
+             {"line": [11.5, 7.5]}],
+            [{"move": [13, 7.5]}, {"curve": [13.5, 7.5, 13.5, 8]}, {"line": [13.5, 9.5]}],
+
+            [{"move": [5.5, 5.5]}, {"line": [5.5, 7]},
+             {"curve": [5.5, 7.5, 6, 7.5]}, {"line": [7.5, 7.5]}],
+            [{"move": [6, 7.5]}, {"curve": [5.5, 7.5, 5.5, 8]},
+             {"line": [5.5, 9.5]}],
+
+            [{"move": [19, 11.5]}, {"line": [16, 11.5]}, {"curve": [15.5, 11.5, 15.5, 12]},
+             {"line": [15.5, 13]}, {"curve": [15.5, 13.5, 16, 13.5]}, {"line": [18, 13.5]},
+             {"curve": [18.5, 13.5, 18.5, 14]}, {"line": [18.5, 17]},
+             {"curve": [18.5, 17.5, 18, 17.5]}, {"line": [17.5, 17.5]}],
+            [{"move": [18, 17.5]}, {"curve": [18.5, 17.5, 18.5, 18]}, {"line": [18.5, 21]},
+             {"curve": [18.5, 21.5, 18, 21.5]}, {"line": [1, 21.5]},
+             {"curve": [0.5, 21.5, 0.5, 21]}, {"line": [0.5, 18]},
+             {"curve": [0.5, 17.5, 1, 17.5]}, {"line": [1.5, 17.5]}],
+            [{"move": [1, 17.5]}, {"curve": [0.5, 17.5, 0.5, 17]},
+             {"line": [0.5, 14]}, {"curve": [0.5, 13.5, 1, 13.5]},
+             {"line": [3, 13.5]}, {"curve": [3.5, 13.5, 3.5, 13]},
+             {"line": [3.5, 12]}, {"curve": [3.5, 11.5, 3, 11.5]},
+             {"line": [0, 11.5]}],
+
+            [{"move": [13.5, 11.5]}, {"line": [13.5, 13.5]}],
+            [{"move": [5.5, 11.5]}, {"line": [5.5, 13.5]}],
+
+            [{"move": [16.5, 15.5]}, {"line": [16, 15.5]},
+             {"curve": [15.5, 15.5, 15.5, 16]}, {"line": [15.5, 17.5]}],
+            [{"move": [2.5, 15.5]}, {"line": [3, 15.5]},
+             {"curve": [3.5, 15.5, 3.5, 16]}, {"line": [3.5, 17.5]}],
+
+            [{"move": [13.5, 15.5]}, {"line": [11.5, 15.5]}],
+            [{"move": [7.5, 15.5]}, {"line": [5.5, 15.5]}],
+            
+            [{"move": [16.5, 19.5]}, {"line": [14, 19.5]},
+             {"curve": [13.5, 19.5, 13.5, 19]}, {"line": [13.5, 17.5]}],
+            [{"move": [13.5, 19]}, {"curve": [13.5, 19.5, 13, 19.5]},
+             {"line": [11.5, 19.5]}],
+
+            [{"move": [7.5, 19.5]}, {"line": [6, 19.5]},
+             {"curve": [5.5, 19.5, 5.5, 19]}, {"line": [5.5, 17.5]}],
+            [{"move": [5.5, 19]}, {"curve": [5.5, 19.5, 5, 19.5]},
+             {"line": [2.5, 19.5]}],
+
+            [{"move": [11.5, 13.5]}, {"line": [10, 13.5]},
+             {"curve": [9.5, 13.5, 9.5, 14]}, {"line": [9.5, 15.5]}],
+            [{"move": [9.5, 14]}, {"curve": [9.5, 13.5, 9, 13.5]},
+             {"line": [7.5, 13.5]}],
+
+            [{"move": [11.5, 17.5]}, {"line": [10, 17.5]},
+             {"curve": [9.5, 17.5, 9.5, 18]}, {"line": [9.5, 19.5]}],
+            [{"move": [9.5, 18]}, {"curve": [9.5, 17.5, 9, 17.5]},
+             {"line": [7.5, 17.5]}],
+
+            [{"move": [10.5, 9.5]}, {"line": [11, 9.5]}, {"curve": [11.5, 9.5, 11.5, 10]},
+             {"line": [11.5, 11]}, {"curve": [11.5, 11.5, 11, 11.5]},
+             {"line": [8, 11.5]}, {"curve": [7.5, 11.5, 7.5, 11]},
+             {"line": [7.5, 10]}, {"curve": [7.5, 9.5, 8, 9.5]},
+             {"line": [8.5, 9.5]}]
+        ];
+
+        Pacman.WALLS = [
+            [{"move": [0, 9.5]}, {"line": [3, 9.5]},
+             {"curve": [3.5, 9.5, 3.5, 9]}, {"line": [3.5, 8]},
+             {"curve": [3.5, 7.5, 3, 7.5]}, {"line": [1, 7.5]},
+             {"curve": [0.5, 7.5, 0.5, 7]}, {"line": [0.5, 1]},
+             {"curve": [0.5, 0.5, 1, 0.5]}, {"line": [9, 0.5]},
+             {"curve": [9.5, 0.5, 9.5, 1]}, {"line": [9.5, 3.5]}],
+
+            [{"move": [9.5, 1]},
+             {"curve": [9.5, 0.5, 10, 0.5]}, {"line": [18, 0.5]},
+             {"curve": [18.5, 0.5, 18.5, 1]}, {"line": [18.5, 7]},
+             {"curve": [18.5, 7.5, 18, 7.5]}, {"line": [16, 7.5]},
+             {"curve": [15.5, 7.5, 15.5, 8]}, {"line": [15.5, 9]},
+             {"curve": [15.5, 9.5, 16, 9.5]}, {"line": [19, 9.5]}],
+
+            [{"move": [2.5, 5.5]}, {"line": [3.5, 5.5]}],
+
+            [{"move": [3, 2.5]},
+             {"curve": [3.5, 2.5, 3.5, 3]},
+             {"curve": [3.5, 3.5, 3, 3.5]},
+             {"curve": [2.5, 3.5, 2.5, 3]},
+             {"curve": [2.5, 2.5, 3, 2.5]}],
+
+            [{"move": [15.5, 5.5]}, {"line": [16.5, 5.5]}],
+
+            [{"move": [16, 2.5]}, {"curve": [16.5, 2.5, 16.5, 3]},
+             {"curve": [16.5, 3.5, 16, 3.5]}, {"curve": [15.5, 3.5, 15.5, 3]},
+             {"curve": [15.5, 2.5, 16, 2.5]}],
+
+            [{"move": [6, 2.5]}, {"line": [7, 2.5]}, {"curve": [7.5, 2.5, 7.5, 3]},
+             {"curve": [7.5, 3.5, 7, 3.5]}, {"line": [6, 3.5]},
+             {"curve": [5.5, 3.5, 5.5, 3]}, {"curve": [5.5, 2.5, 6, 2.5]}],
+
+            [{"move": [12, 2.5]}, {"line": [13, 2.5]}, {"curve": [13.5, 2.5, 13.5, 3]},
+             {"curve": [13.5, 3.5, 13, 3.5]}, {"line": [12, 3.5]},
+             {"curve": [11.5, 3.5, 11.5, 3]}, {"curve": [11.5, 2.5, 12, 2.5]}],
+
+            [{"move": [7.5, 5.5]}, {"line": [9, 5.5]}, {"curve": [9.5, 5.5, 9.5, 6]},
+             {"line": [9.5, 7.5]}],
+            [{"move": [9.5, 6]}, {"curve": [9.5, 5.5, 10.5, 5.5]},
+             {"line": [11.5, 5.5]}],
+
+            [{"move": [5.5, 5.5]}, {"line": [5.5, 7]}, {"curve": [5.5, 7.5, 6, 7.5]},
+             {"line": [7.5, 7.5]}],
+            [{"move": [6, 7.5]}, {"curve": [5.5, 7.5, 5.5, 8]}, {"line": [5.5, 9.5]}],
+
+            [{"move": [13.5, 5.5]}, {"line": [13.5, 7]},
+             {"curve": [13.5, 7.5, 13, 7.5]}, {"line": [11.5, 7.5]}],
+            [{"move": [13, 7.5]}, {"curve": [13.5, 7.5, 13.5, 8]},
+             {"line": [13.5, 9.5]}],
+
+            [{"move": [0, 11.5]}, {"line": [3, 11.5]}, {"curve": [3.5, 11.5, 3.5, 12]},
+             {"line": [3.5, 13]}, {"curve": [3.5, 13.5, 3, 13.5]}, {"line": [1, 13.5]},
+             {"curve": [0.5, 13.5, 0.5, 14]}, {"line": [0.5, 17]},
+             {"curve": [0.5, 17.5, 1, 17.5]}, {"line": [1.5, 17.5]}],
+            [{"move": [1, 17.5]}, {"curve": [0.5, 17.5, 0.5, 18]}, {"line": [0.5, 21]},
+             {"curve": [0.5, 21.5, 1, 21.5]}, {"line": [18, 21.5]},
+             {"curve": [18.5, 21.5, 18.5, 21]}, {"line": [18.5, 18]},
+             {"curve": [18.5, 17.5, 18, 17.5]}, {"line": [17.5, 17.5]}],
+            [{"move": [18, 17.5]}, {"curve": [18.5, 17.5, 18.5, 17]},
+             {"line": [18.5, 14]}, {"curve": [18.5, 13.5, 18, 13.5]},
+             {"line": [16, 13.5]}, {"curve": [15.5, 13.5, 15.5, 13]},
+             {"line": [15.5, 12]}, {"curve": [15.5, 11.5, 16, 11.5]},
+             {"line": [19, 11.5]}],
+
+            [{"move": [5.5, 11.5]}, {"line": [5.5, 13.5]}],
+            [{"move": [13.5, 11.5]}, {"line": [13.5, 13.5]}],
+
+            [{"move": [2.5, 15.5]}, {"line": [3, 15.5]},
+             {"curve": [3.5, 15.5, 3.5, 16]}, {"line": [3.5, 17.5]}],
+            [{"move": [16.5, 15.5]}, {"line": [16, 15.5]},
+             {"curve": [15.5, 15.5, 15.5, 16]}, {"line": [15.5, 17.5]}],
+
+            [{"move": [5.5, 15.5]}, {"line": [7.5, 15.5]}],
+            [{"move": [11.5, 15.5]}, {"line": [13.5, 15.5]}],
+            
+            [{"move": [2.5, 19.5]}, {"line": [5, 19.5]},
+             {"curve": [5.5, 19.5, 5.5, 19]}, {"line": [5.5, 17.5]}],
+            [{"move": [5.5, 19]}, {"curve": [5.5, 19.5, 6, 19.5]},
+             {"line": [7.5, 19.5]}],
+
+            [{"move": [11.5, 19.5]}, {"line": [13, 19.5]},
+             {"curve": [13.5, 19.5, 13.5, 19]}, {"line": [13.5, 17.5]}],
+            [{"move": [13.5, 19]}, {"curve": [13.5, 19.5, 14, 19.5]},
+             {"line": [16.5, 19.5]}],
+
+            [{"move": [7.5, 13.5]}, {"line": [9, 13.5]},
+             {"curve": [9.5, 13.5, 9.5, 14]}, {"line": [9.5, 15.5]}],
+            [{"move": [9.5, 14]}, {"curve": [9.5, 13.5, 10, 13.5]},
+             {"line": [11.5, 13.5]}],
+
+            [{"move": [7.5, 17.5]}, {"line": [9, 17.5]},
+             {"curve": [9.5, 17.5, 9.5, 18]}, {"line": [9.5, 19.5]}],
+            [{"move": [9.5, 18]}, {"curve": [9.5, 17.5, 10, 17.5]},
+             {"line": [11.5, 17.5]}],
+
+            [{"move": [8.5, 9.5]}, {"line": [8, 9.5]}, {"curve": [7.5, 9.5, 7.5, 10]},
+             {"line": [7.5, 11]}, {"curve": [7.5, 11.5, 8, 11.5]},
+             {"line": [11, 11.5]}, {"curve": [11.5, 11.5, 11.5, 11]},
+             {"line": [11.5, 10]}, {"curve": [11.5, 9.5, 11, 9.5]},
+             {"line": [10.5, 9.5]}]
+        ];
+
+        Object.defineProperty(Object.prototype, 'clone', {
+            value: function () {
+                var i, newObj = (this instanceof Array) ? [] : {};
+                for (i in this) {
+                    if (i === 'clone') {
+                        continue;
+                    }
+                    if (this[i] && typeof this[i] === "object") {
+                        newObj[i] = this[i].clone();
+                    } else {
+                        newObj[i] = this[i];
+                    }
+                }
+                return newObj;
+            },
+            enumerable: false,
+            writable: true,
+            configurable: true
+        });
+
+        $(function(){
+          var el = document.getElementById("pacman");
+          if (Modernizr.canvas && Modernizr.localstorage && 
+              Modernizr.audio && (Modernizr.audio.ogg || Modernizr.audio.mp3)) {
+            window.setTimeout(function () { PACMAN.init(el, "https://raw.githubusercontent.com/daleharvey/pacman/master/"); }, 0);
+          } else { 
+            el.innerHTML = "Sorry, needs a decent browser<br /><small>" + 
+              "(firefox 3.6+, Chrome 4+, Opera 10+ and Safari 4+)</small>";
+          }
+        });
+    </script>
+
+<div id="registroModal" style="
+    display:none;
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,.9);
+    justify-content:center;
+    align-items:center;
+    z-index:20500;
+    padding:15px;
+    box-sizing:border-box;
+">
+    <div style="
+        background:#111;
+        border:3px solid #ffd700;
+        border-radius:12px;
+        padding:25px;
+        max-width:380px;
+        width:100%;
+        max-height:85vh;
+        overflow-y:auto;
+        color:white;
+        font-family:Arial;
+        text-align:center;
+    ">
+        <h2 style="color:#ffd700;margin-top:0;">📝 Antes de empezar</h2>
+        <p style="font-size:14px;color:#ccc;">Registra tus datos para poder jugar:</p>
+
+        <input id="nombreJugador"
+               type="text"
+               placeholder="Usuario NT Ej. PABLOCAV"
+               style="width:95%;padding:10px;margin:8px 0;">
+
+        <select id="sucursalJugador"
+            style="width:100%;padding:10px;margin:8px 0;">
+            <option value="" disabled selected>Selecciona tu nombre</option>
+            <option value="Yury Nathalia Jimenez Enciso">Yury Nathalia Jimenez Enciso</option>
+            <option value="Bibiana Rocío Peña González">Bibiana Rocío Peña González</option>
+            <option value="Angi Mildreth Suarez Rojas">Angi Mildreth Suarez Rojas</option>
+            <option value="Gloria Consuelo Rodríguez">Gloria Consuelo Rodríguez</option>
+            <option value="Veronica Maria Bolivar Ruiz">Veronica Maria Bolivar Ruiz</option>
+            <option value="Jhony San Juan Florez">Jhony San Juan Florez</option>
+            <option value="Vanessa Patricia Castro Donado">Vanessa Patricia Castro Donado</option>
+            <option value="Lair Eduardo Garcia Rincón">Lair Eduardo Garcia Rincón</option>
+            <option value="Desiread Astrid Morin Vitoria">Desiread Astrid Morin Vitoria</option>
+            <option value="Mónica Patricia Vera">Mónica Patricia Vera</option>
+            <option value="Blanca Nidia Jaramillo Cuartas">Blanca Nidia Jaramillo Cuartas</option>
+            <option value="Paula Alejandra Calderon Giraldo">Paula Alejandra Calderon Giraldo</option>
+            <option value="Wilson Garzón Lizarazo">Wilson Garzón Lizarazo</option>
+            <option value="Óscar Antonio Ubaque Cano">Óscar Antonio Ubaque Cano</option>
+            <option value="Luisa Andrea Tiraco Sánchez">Luisa Andrea Tiraco Sánchez</option>
+            <option value="Luis Fernando Collazos Hernández">Luis Fernando Collazos Hernández</option>
+            <option value="Juan Carlos Gálvez Cáceres">Juan Carlos Gálvez Cáceres</option>
+            <option value="José Nicolay Camacho Ubraado">José Nicolay Camacho Ubraado</option>
+            <option value="Jaime Ernesto Castillo Cantillo">Jaime Ernesto Castillo Cantillo</option>
+            <option value="Angélica María Rodríguez Pérez">Angélica María Rodríguez Pérez</option>
+            <option value="María Mercedes Mateos Ruiz">María Mercedes Mateos Ruiz</option>
+            <option value="Daniel Felipe González">Daniel Felipe González</option>
+            <option value="Sebastián Toro Hernández">Sebastián Toro Hernández</option>
+            <option value="Eliana Ruiz Quintero">Eliana Ruiz Quintero</option>
+            <option value="Erika Maya">Erika Maya</option>
+            <option value="José Javier Tapia Echeverri">José Javier Tapia Echeverri</option>
+            <option value="María del Pilar Morales">María del Pilar Morales</option>
+        </select>
+
+        <div style="text-align:center;margin:10px 2px;">
+            <p style="margin:5px 0;">Tipo de participación:</p>
+            <label style="margin-right:20px;">
+                <input type="radio" name="tipoParticipacion" id="participacionIndividual" value="Individual">
+                Individual
+            </label>
+            <label>
+                <input type="radio" name="tipoParticipacion" id="participacionGrupal" value="Grupal">
+                Grupal
+            </label>
+        </div>
+
+        <input id="equipoJugador"
+               type="text"
+               placeholder="Nombre del equipo (ej. LOS BIGOTES)"
+               style="width:95%;padding:10px;margin:8px 0;display:none;">
+
+        <button id="btnJugarRegistro" disabled style="
+            margin-top:15px;padding:12px 25px;background:#555;
+            border:none;border-radius:8px;font-weight:bold;
+            cursor:not-allowed;color:white;width:80%;">
+            Completa los datos para jugar
+        </button>
+    </div>
+</div>
+
+<div id="ilustracionModal" style="
+    display:none;
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,.9);
+    justify-content:center;
+    align-items:center;
+    z-index:10000;
+">
+    <div style="
+        background:#111;
+        border:3px solid #ffd700;
+        border-radius:12px;
+        padding:20px;
+        max-width:90vw;
+        color:white;
+        font-family:Arial;
+        text-align:center;
+    ">
+        <h2 id="ilustracionTitulo" style="color:#ffd700;margin-top:0;"></h2>
+        <img id="ilustracionImagen" src="" alt="" style="max-width:100%;max-height:60vh;border-radius:8px;display:block;margin:0 auto;">
+        <p id="ilustracionTexto" style="margin-top:10px;"></p>
+
+        <button id="btnContinuarIlustracion" style="
+            margin-top:15px;padding:12px 25px;background:#ffd700;
+            border:none;border-radius:8px;font-weight:bold;
+            cursor:pointer;color:#111;">Continuar</button>
+    </div>
+</div>
+
+<div id="celebracionModal" style="
+    display:none;
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,.9);
+    justify-content:center;
+    align-items:center;
+    z-index:10000;
+">
+    <div style="
+        background:#111;
+        border:3px solid #ffd700;
+        border-radius:12px;
+        padding:20px;
+        max-width:90vw;
+        color:white;
+        font-family:Arial;
+        text-align:center;
+    ">
+        <h2 style="color:#ffd700;margin-top:0;">🎉 ¡Todos a salvo! 🎉</h2>
+        <img id="celebracionImagen"
+             src="assets/celebracion-final.png"
+             alt=""
+             style="max-width:100%;max-height:60vh;border-radius:8px;display:block;margin:0 auto;"
+             onerror="this.style.display='none';">
+        <p style="margin-top:10px;">Dulas y todos sus amigos están juntos de nuevo. ¡Ganaste 5.000 puntos extra por completar tu misión!</p>
+
+        <button id="btnContinuarCelebracion" style="
+            margin-top:15px;padding:12px 25px;background:#ffd700;
+            border:none;border-radius:8px;font-weight:bold;
+            cursor:pointer;color:#111;">Continuar</button>
+    </div>
+</div>
+
+<div id="victoriaModal" style="
+    display:none;
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,.85);
+    justify-content:center;
+    align-items:center;
+    z-index:10000;
+">
+    <div style="
+        background:#111;
+        border:3px solid #00ff66;
+        border-radius:12px;
+        padding:25px;
+        width:350px;
+        color:white;
+        font-family:Arial;
+        text-align:center;
+    ">
+        <h2 style="color:#00ff66;margin-top:0;">🎉 ¡Felicidades! 🎉</h2>
+        <p>Completaste los <strong>3 niveles</strong> de Dulas The Game.</p>
+        <p style="color:#ffd700;">¡Eres todo un experto en los Planes Complementarios!</p>
+
+        <button id="btnContinuarVictoria" style="
+            margin-top:15px;padding:12px 25px;background:#00ff66;
+            border:none;border-radius:8px;font-weight:bold;
+            cursor:pointer;color:#111;">Continuar</button>
+    </div>
+</div>
+
+<div id="ofertaTriviaModal" style="
+    display:none;
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,.8);
+    justify-content:center;
+    align-items:center;
+    z-index:10000;
+">
+    <div style="
+        background:#111;
+        border:3px solid yellow;
+        border-radius:12px;
+        padding:25px;
+        width:350px;
+        color:white;
+        font-family:Arial;
+        text-align:center;
+    ">
+        <h2 style="color:yellow;margin-top:0;">🎁 ¡Duplica tu puntaje!</h2>
+        <p>¿Quieres responder una pregunta de verdadero o falso para intentar <strong>duplicar</strong> tu puntaje?</p>
+        <p style="color:#ff6666;">Tendrás solo 20 segundos. Si fallas o se acaba el tiempo, perderás la mitad de tus puntos.</p>
+
+        <button id="btnAceptarTrivia" style="
+            margin:8px 5px;padding:12px 20px;background:#4CAF50;
+            border:none;border-radius:8px;font-weight:bold;
+            cursor:pointer;color:white;">Sí, quiero intentar</button>
+
+        <button id="btnRechazarTrivia" style="
+            margin:8px 5px;padding:12px 20px;background:#555;
+            border:none;border-radius:8px;font-weight:bold;
+            cursor:pointer;color:white;">No, gracias</button>
+    </div>
+</div>
+
+<div id="triviaModal" style="
+        display:none;
+        position:fixed;
+        top:0;
+        left:0;
+        width:100%;
+        height:100%;
+        background:rgba(0,0,0,.8);
+        justify-content:center;
+        align-items:center;
+        z-index:10000;
+    ">
+        <div style="
+            background:#111;
+            border:3px solid yellow;
+            border-radius:12px;
+            padding:25px;
+            width:350px;
+            color:white;
+            font-family:Arial;
+            text-align:center;
+        ">
+            <h2 style="color:yellow;margin-top:0;">🎁 ¡Puntos dobles!</h2>
+            <p>Responde correctamente y duplica tu puntaje:</p>
+            <p id="triviaPregunta" style="color:#00ff66;font-weight:bold;"></p>
+            <p id="triviaTimer" style="color:#ff6666;font-weight:bold;"></p>
+
+            <button id="btnVerdadero" style="
+                margin:8px 5px;padding:12px 20px;background:#064d8d;
+                border:none;border-radius:8px;font-weight:bold;
+                cursor:pointer;color:white;">Verdadero</button>
+
+            <button id="btnFalso" style="
+                margin:8px 5px;padding:12px 20px;background:#bb1d76;
+                border:none;border-radius:8px;font-weight:bold;
+                cursor:pointer;color:white;">Falso</button>
+        </div>
+    </div>
+
+<div id="vidaExtraModal" style="
+        display:none;
+        position:fixed;
+        top:0;
+        left:0;
+        width:100%;
+        height:100%;
+        background:rgba(0,0,0,.8);
+        justify-content:center;
+        align-items:center;
+        z-index:10000;
+    ">
+        <div style="
+            background:#111;
+            border:3px solid #33aaff;
+            border-radius:12px;
+            padding:25px;
+            width:350px;
+            color:white;
+            font-family:Arial;
+            text-align:center;
+        ">
+            <h2 style="color:#33aaff;margin-top:0;">💙 ¡Última oportunidad!</h2>
+            <p>Responde bien en 30 segundos y obtén una vida extra:</p>
+            <p id="vidaPregunta" style="color:#00ff66;font-weight:bold;"></p>
+            <p id="vidaTimer" style="color:#ff6666;font-weight:bold;"></p>
+
+            <button id="btnVidaVerdadero" style="
+                margin:8px 5px;padding:12px 20px;background:#064d8d;
+                border:none;border-radius:8px;font-weight:bold;
+                cursor:pointer;color:white;">Verdadero</button>
+
+            <button id="btnVidaFalso" style="
+                margin:8px 5px;padding:12px 20px;background:#bb1d76;
+                border:none;border-radius:8px;font-weight:bold;
+                cursor:pointer;color:white;">Falso</button>
+        </div>
+    </div>
+
+    <div id="premioModal" style="
+        display:none;
+        position:fixed;
+        top:0; left:0;
+        width:100%; height:100%;
+        background:rgba(0,0,0,.85);
+        justify-content:center;
+        align-items:center;
+        z-index:10500;
+    ">
+        <div style="
+            background:#111;
+            border:3px solid gold;
+            border-radius:12px;
+            padding:25px;
+            width:340px;
+            color:white;
+            font-family:Arial;
+            text-align:center;
+            max-height:85vh;
+            overflow-y:auto;
+        ">
+            <h2 style="color:gold;margin-top:0;">🏆 ¡Felicidades! 🏆</h2>
+            <p>Llegaste a los <strong>28.000 puntos</strong> y ganaste un <strong>perro Dulas de peluche</strong> 🐶</p>
+            <p style="font-size:13px;color:#ccc;">Completa tus datos para reclamar tu premio:</p>
+
+            <input id="premioNombre"
+                   type="text"
+                   placeholder="Nombre completo"
+                   style="width:95%;padding:10px;margin:8px 0;">
+
+            <select id="premioSucursal"
+                    style="width:100%;padding:10px;margin:8px 0;">
+                <option value="" disabled selected>Selecciona tu nombre</option>
+                <option value="Yury Nathalia Jimenez Enciso">Yury Nathalia Jimenez Enciso</option>
+                <option value="Bibiana Rocío Peña González">Bibiana Rocío Peña González</option>
+                <option value="Angi Mildreth Suarez Rojas">Angi Mildreth Suarez Rojas</option>
+                <option value="Gloria Consuelo Rodríguez">Gloria Consuelo Rodríguez</option>
+                <option value="Veronica Maria Bolivar Ruiz">Veronica Maria Bolivar Ruiz</option>
+                <option value="Jhony San Juan Florez">Jhony San Juan Florez</option>
+                <option value="Vanessa Patricia Castro Donado">Vanessa Patricia Castro Donado</option>
+                <option value="Lair Eduardo Garcia Rincón">Lair Eduardo Garcia Rincón</option>
+                <option value="Desiread Astrid Morin Vitoria">Desiread Astrid Morin Vitoria</option>
+                <option value="Mónica Patricia Vera">Mónica Patricia Vera</option>
+                <option value="Blanca Nidia Jaramillo Cuartas">Blanca Nidia Jaramillo Cuartas</option>
+                <option value="Paula Alejandra Calderon Giraldo">Paula Alejandra Calderon Giraldo</option>
+                <option value="Wilson Garzón Lizarazo">Wilson Garzón Lizarazo</option>
+                <option value="Óscar Antonio Ubaque Cano">Óscar Antonio Ubaque Cano</option>
+                <option value="Luisa Andrea Tiraco Sánchez">Luisa Andrea Tiraco Sánchez</option>
+                <option value="Luis Fernando Collazos Hernández">Luis Fernando Collazos Hernández</option>
+                <option value="Juan Carlos Gálvez Cáceres">Juan Carlos Gálvez Cáceres</option>
+                <option value="José Nicolay Camacho Ubraado">José Nicolay Camacho Ubraado</option>
+                <option value="Jaime Ernesto Castillo Cantillo">Jaime Ernesto Castillo Cantillo</option>
+                <option value="Angélica María Rodríguez Pérez">Angélica María Rodríguez Pérez</option>
+                <option value="María Mercedes Mateos Ruiz">María Mercedes Mateos Ruiz</option>
+                <option value="Daniel Felipe González">Daniel Felipe González</option>
+                <option value="Sebastián Toro Hernández">Sebastián Toro Hernández</option>
+                <option value="Eliana Ruiz Quintero">Eliana Ruiz Quintero</option>
+                <option value="Erika Maya">Erika Maya</option>
+                <option value="José Javier Tapia Echeverri">José Javier Tapia Echeverri</option>
+                <option value="María del Pilar Morales">María del Pilar Morales</option>
+            </select>
+
+            <input id="premioArea"
+                   type="text"
+                   placeholder="Área"
+                   style="width:95%;padding:10px;margin:8px 0;">
+
+            <input id="premioCargo"
+                   type="text"
+                   placeholder="Cargo"
+                   style="width:95%;padding:10px;margin:8px 0;">
+
+            <button id="btnReclamarPremio"
+                    style="
+                        margin-top:10px;
+                        padding:12px 25px;
+                        background:gold;
+                        border:none;
+                        border-radius:8px;
+                        font-weight:bold;
+                        cursor:pointer;
+                    ">
+                Reclamar premio
+            </button>
+        </div>
+    </div>
+
+    <div id="gameOverModal" style="
+        display:none;
+        position:fixed;
+        top:0;
+        left:0;
+        width:100%;
+        height:100%;
+        background:rgba(0,0,0,.8);
+        justify-content:center;
+        align-items:center;
+        z-index:9999;
+        padding:15px;
+        box-sizing:border-box;
+    ">
+        <div style="
+            background:#111;
+            border:3px solid yellow;
+            border-radius:12px;
+            padding:25px;
+            max-width:650px;
+            width:100%;
+            max-height:90vh;
+            overflow-y:auto;
+            color:white;
+            font-family:Arial;
+            text-align:center;
+            display:flex;
+            flex-wrap:wrap;
+            gap:25px;
+            justify-content:center;
+            box-sizing:border-box;
+        ">
+        <div style="flex:1;min-width:230px;">
+            <h2 style="color:yellow;margin-top:0;">🏆 GAME OVER</h2>
+
+            <img id="imagenDerrotaMultiplicador"
+                 src="assets/derrota-multiplicador.png"
+                 alt=""
+                 style="display:none;max-width:100%;max-height:180px;border-radius:8px;margin:0 auto 8px auto;"
+                 onerror="this.style.display='none';">
+            <p id="textoDerrotaMultiplicador" style="display:none;color:#ff8888;">
+                Los fantasmas alcanzaron a tu amigo... ¡Inténtalo de nuevo!
+            </p>
+
+            <p>Tu puntaje fue:</p>
+            <h1 id="finalScore" style="color:#00ff66;">0</h1>
+            <p id="mensajeGuardado" style="display:none;color:#4CAF50;font-weight:bold;">✅ ¡Puntaje guardado con éxito!</p>
+        </div>
+
+                <div style="flex:1;min-width:230px;display:flex;flex-direction:column;justify-content:center;align-items:center;">
+                    <button id="jugarDeNuevo"
+                    style="
+                        margin-top:15px;
+                        margin-left:10px;
+                        padding:12px 25px;
+                        background:#33aaff;
+                        border:none;
+                        border-radius:8px;
+                        font-weight:bold;
+                        cursor:pointer;
+                        color:white;
+                    ">
+                Jugar de nuevo
+            </button>
+        </div>
+        </div>
+    </div>
+
+    <!-- Asegúrate de que el archivo firebase.js esté en la ruta correcta 'js/firebase.js' -->
+    <script src="js/firebase.js"></script>
+
+</body>
+</html>
