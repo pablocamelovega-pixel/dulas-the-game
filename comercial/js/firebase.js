@@ -28,7 +28,7 @@ window.guardarPuntaje = async function(nombre, sucursal, tipoParticipacion, equi
     }
 };
 
-function crearTarjetaJugador(jugador) {
+function crearTarjetaEquipo(equipo) {
     const tarjeta = document.createElement("div");
     tarjeta.style.border = "2px solid yellow";
     tarjeta.style.borderRadius = "8px";
@@ -39,8 +39,8 @@ function crearTarjetaJugador(jugador) {
     tarjeta.style.fontWeight = "bold";
 
     tarjeta.innerHTML =
-        "<span>" + jugador.nombre + "</span>" +
-        "<span>" + jugador.puntaje + " pts</span>";
+        "<span>" + equipo.equipo + " — Gerente " + equipo.sucursal + "</span>" +
+        "<span>" + equipo.total + " pts</span>";
 
     return tarjeta;
 }
@@ -55,10 +55,10 @@ function cargarRanking() {
             const contenedor = document.getElementById("listaComercial");
             contenedor.innerHTML = "";
 
-            const listaJugadores = datos.rankingJugadores || [];
+            const listaEquipos = datos.rankingEquipos || [];
 
-            listaJugadores.forEach(function (jugador) {
-                contenedor.appendChild(crearTarjetaJugador(jugador));
+            listaEquipos.forEach(function (equipo) {
+                contenedor.appendChild(crearTarjetaEquipo(equipo));
             });
 
             if (!contenedor.hasChildNodes()) {
@@ -109,3 +109,4 @@ window.guardarEstadisticasTrivia = async function(trivia) {
         console.error("No se pudieron guardar las estadísticas de trivia:", error);
     }
 };
+
