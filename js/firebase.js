@@ -32,12 +32,26 @@ function crearTarjetaEquipo(equipo) {
     tarjeta.style.padding = "8px 12px";
     tarjeta.style.margin = "8px 0";
     tarjeta.style.display = "flex";
-    tarjeta.style.justifyContent = "space-between";
+    tarjeta.style.flexDirection = "column";
     tarjeta.style.fontWeight = "bold";
 
-    tarjeta.innerHTML =
+    var filaSuperior = document.createElement("div");
+    filaSuperior.style.display = "flex";
+    filaSuperior.style.justifyContent = "space-between";
+    filaSuperior.innerHTML =
         "<span>" + equipo.equipo + " — " + equipo.sucursal + "</span>" +
         "<span>" + equipo.total + " pts</span>";
+
+    tarjeta.appendChild(filaSuperior);
+
+    if (equipo.tieneBonoFoto) {
+        var filaBono = document.createElement("div");
+        filaBono.style.color = "#00ff66";
+        filaBono.style.fontSize = "12px";
+        filaBono.style.textAlign = "right";
+        filaBono.innerText = "📸 +5.000 pts (bono foto Viva Engage)";
+        tarjeta.appendChild(filaBono);
+    }
 
     return tarjeta;
 }
