@@ -2493,19 +2493,8 @@
                     });
                 }
 
-                                forzarMayusculas("nombreJugador");
+                forzarMayusculas("nombreJugador");
                 forzarMayusculas("equipoJugador");
-
-                document.getElementById("btnProbarNivel3").addEventListener("click", function () {
-                    window.datosJugador = window.datosJugador || {
-                        nombre: "PRUEBA",
-                        sucursal: "Sucursal Atlántico",
-                        tipoParticipacion: "Individual",
-                        equipo: ""
-                    };
-                    saltarANivel3();
-                });
-
 
                 timer = window.setInterval(mainLoop, 1000 / Pacman.FPS);
             };
