@@ -2197,6 +2197,18 @@
                             return;
                         }
 
+                        var mensajeConfirmacion;
+                        if (resultado.tipo === "diez") {
+                            mensajeConfirmacion = "Estás usando el código de los 10 intentos, te quedan " + resultado.intentosRestantes + ", ¿deseas continuar?";
+                        } else {
+                            mensajeConfirmacion = "Estás usando el código de un intento, ¿deseas continuar?";
+                        }
+
+                        var confirmado = window.confirm(mensajeConfirmacion);
+                        if (!confirmado) {
+                            return;
+                        }
+
                         window.finalistaValido = true;
                         window.codigoFinalista = codigoIngresado;
 
