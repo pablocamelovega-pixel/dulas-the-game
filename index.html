@@ -1980,11 +1980,14 @@
             }
 
                 function esHorarioPermitido() {
-                return true; // TEMPORAL: quitar esta línea para reactivar la restricción de horario
+                return false; // TEMPORAL: cerrado mientras se terminan los ajustes, borrar esta línea para reactivar
 
-                if (window.modoPruebaSinHorarioGlobal) {
+                if (window.finalistaValido === true) {
                     return true;
                 }
+                var info = obtenerHoraBogota();
+                return info.hora < 12;
+            }
 
                 var info = obtenerHoraBogota();
 
