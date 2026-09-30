@@ -409,13 +409,25 @@
         <div id="botonClickInicial">🔊 TOCA PARA COMENZAR 🔊</div>
     </div>
 
-    <div id="pantallaBloqueada">
+        <div id="pantallaBloqueada">
         <div id="cajaBloqueada">
-            <img src="assets/bloqueado.gif" alt="Fuera de horario" style="max-width:100%;display:block;margin:0 auto 15px auto;">
-            <h2>⏰ Fuera de horario</h2>
-            <p>Dulas The Game solo está disponible:</p>
-            <p>🕐 Lunes a viernes, de 12:00 m. a 2:00 p.m. y de 5:00 p.m. a 7:00 a.m</p>
-            <p>📅 Sábados y domingos, todo el día</p>
+            <h2 style="color:#ff6666;font-size:32px;">GAME OVER</h2>
+            <p>El período de participación general de DULAS PAC ha finalizado.</p>
+            <p>¡Gracias a todos los que jugaron y compitieron con tanto entusiasmo!</p>
+
+            <button id="btnSoyFinalista" style="
+                margin-top:20px;padding:12px 25px;background:#ffd700;
+                border:none;border-radius:8px;font-weight:bold;
+                cursor:pointer;color:#111;width:80%;">🏆 Soy finalista - Ingresar código</button>
+
+            <br>
+
+            <a id="btnFormulario" href="https://forms.cloud.microsoft/pages/responsepage.aspx?id=UCOfiA7u-E2KiAayp_lMzOtpXUGk961Moe7uIAIUtoVUNlI3QTdEV0pHWTM5WFE5QzdHN0tDNzhSRC4u&route=shorturl" target="_blank" style="
+                display:inline-block;
+                margin-top:12px;padding:12px 25px;background:#33aaff;
+                border-radius:8px;font-weight:bold;
+                cursor:pointer;color:white;text-decoration:none;width:80%;
+                box-sizing:border-box;">📋 Completar formulario</a>
         </div>
     </div>
 
@@ -670,56 +682,67 @@
                 ctx.fill();
             };
 
-            function pane(pos) {
-                if (pos.y === 100 && pos.x >= 190 && direction === RIGHT) {
-                    return {"y": 100, "x": -10};
-                }
-                if (pos.y === 100 && pos.x <= -10 && direction === LEFT) {
-                    return position = {"y": 100, "x": 190};
+                function pane(pos) {
+                var filasPortal = [60, 100, 160];
+                if (filasPortal.indexOf(pos.y) !== -1) {
+                    if (pos.x >= 190 && direction === RIGHT) {
+                        return {"y": pos.y, "x": -10};
+                    }
+                    if (pos.x <= -10 && direction === LEFT) {
+                        return {"y": pos.y, "x": 190};
+                    }
                 }
                 return false;
             };
             
-            function move(ctx) {
+                function move(ctx) {
                 var oldPos = position,
                     onGrid = onGridSquare(position),
-                    npos   = null;
-                
-                if (due !== direction) {
-                    npos = getNewCoord(due, position);
-                    if (onGrid &&
-                        map.isFloorSpace({
-                            "y":pointToCoord(nextSquare(npos.y, due)),
-                            "x":pointToCoord(nextSquare(npos.x, due))})) {
-                        direction = due;
-                    } else {
-                        npos = null;
+                    npos   = null,
+                    intentos = 0;
+
+                while (true) {
+                    npos = null;
+
+                    if (due !== direction) {
+                        npos = getNewCoord(due, position);
+                        if (onGrid &&
+                            map.isFloorSpace({
+                                "y":pointToCoord(nextSquare(npos.y, due)),
+                                "x":pointToCoord(nextSquare(npos.x, due))})) {
+                            direction = due;
+                        } else {
+                            npos = null;
+                        }
                     }
-                }
-                
-                if (npos === null) {
-                    npos = getNewCoord(direction, position);
-                }
-                
-                if (onGrid &&
-                    map.isWallSpace({
-                        "y" : pointToCoord(nextSquare(npos.y, direction)),
-                        "x" : pointToCoord(nextSquare(npos.x, direction))
-                    })) {
-                    
-                    due = getRandomDirection();            
-                    return move(ctx);
+
+                    if (npos === null) {
+                        npos = getNewCoord(direction, position);
+                    }
+
+                    if (onGrid &&
+                        map.isWallSpace({
+                            "y" : pointToCoord(nextSquare(npos.y, direction)),
+                            "x" : pointToCoord(nextSquare(npos.x, direction))
+                        })) {
+
+                        intentos += 1;
+                        due = (intentos > 4) ? oppositeDirection(direction) : getRandomDirection();
+                        continue;
+                    }
+
+                    break;
                 }
 
-                position = npos;        
-                
+                position = npos;
+
                 var tmp = pane(position);
-                if (tmp) { 
+                if (tmp) {
                     position = tmp;
                 }
-                
+
                 due = getRandomDirection();
-                
+
                 return {
                     "new" : position,
                     "old" : oldPos
@@ -911,12 +934,13 @@
                     return {"new" : position, "old" : position};
                 }
                 
-                if (npos.y === 100 && npos.x >= 190 && direction === RIGHT) {
-                    npos = {"y": 100, "x": -10};
-                }
-                
-                if (npos.y === 100 && npos.x <= -12 && direction === LEFT) {
-                    npos = {"y": 100, "x": 190};
+                var filasPortal = [60, 100, 160];
+                if (filasPortal.indexOf(npos.y) !== -1) {
+                    if (npos.x >= 190 && direction === RIGHT) {
+                        npos = {"y": npos.y, "x": -10};
+                    } else if (npos.x <= -12 && direction === LEFT) {
+                        npos = {"y": npos.y, "x": 190};
+                    }
                 }
                 
                 position = npos;        
@@ -1062,6 +1086,7 @@
                 map       = null,
                 esMapaSimple = false,
                 murosActuales = Pacman.WALLS,
+                colorMuroActual = "#355CFF",
                 totalComestibles = 0,
                 canvasFondo = document.createElement("canvas"),
                 ctxFondo    = canvasFondo.getContext("2d");
@@ -1084,7 +1109,7 @@
                     peice === Pacman.PILL;
             }
             
-            function drawWall(ctx) {
+                function drawWall(ctx) {
                 var i, j, p, line;
                 
                 ctx.strokeStyle = "#0000FF";
@@ -1092,16 +1117,34 @@
                 ctx.lineCap     = "round";
 
                 if (esMapaSimple) {
-                    ctx.fillStyle = "#0000FF";
+                    ctx.save();
+                    ctx.lineJoin = "round";
+                    ctx.lineCap = "round";
+                    ctx.shadowColor = colorMuroActual;
+                    ctx.shadowBlur = blockSize * 0.55;
                     for (i = 0; i < height; i += 1) {
                         for (j = 0; j < width; j += 1) {
                             if (map[i][j] === Pacman.WALL) {
-                                ctx.fillRect(j * blockSize, i * blockSize, blockSize, blockSize);
+                                var x = j * blockSize;
+                                var y = i * blockSize;
+                                var margen = Math.max(1, blockSize * 0.08);
+                                ctx.fillStyle = "#071126";
+                                ctx.fillRect(x, y, blockSize, blockSize);
+                                ctx.strokeStyle = colorMuroActual;
+                                ctx.lineWidth = Math.max(1.5, blockSize * 0.12);
+                                ctx.beginPath();
+                                if (i === 0 || map[i - 1][j] !== Pacman.WALL) { ctx.moveTo(x + margen, y + margen); ctx.lineTo(x + blockSize - margen, y + margen); }
+                                if (i === height - 1 || map[i + 1][j] !== Pacman.WALL) { ctx.moveTo(x + margen, y + blockSize - margen); ctx.lineTo(x + blockSize - margen, y + blockSize - margen); }
+                                if (j === 0 || map[i][j - 1] !== Pacman.WALL) { ctx.moveTo(x + margen, y + margen); ctx.lineTo(x + margen, y + blockSize - margen); }
+                                if (j === width - 1 || map[i][j + 1] !== Pacman.WALL) { ctx.moveTo(x + blockSize - margen, y + margen); ctx.lineTo(x + blockSize - margen, y + blockSize - margen); }
+                                ctx.stroke();
                             }
                         }
                     }
+                    ctx.restore();
                     return;
                 }
+
                 for (i = 0; i < Pacman.WALLS.length; i += 1) {
                     line = Pacman.WALLS[i];
                     ctx.beginPath()
@@ -1124,16 +1167,19 @@
                 }
             }
             
-            function reset(nivelActual) {       
+                function reset(nivelActual) {       
                 var gridElegido = Pacman.MAP;
-                esMapaSimple = false;
+                esMapaSimple = true;
 
                if (nivelActual >= 3) {
                     gridElegido = Pacman.MAP_NIVEL_4_5;
-                    esMapaSimple = true;
+                    colorMuroActual = "#ff4fd8";
                 } else if (nivelActual >= 2) {
                     gridElegido = Pacman.MAP_NIVEL_2_3;
-                    esMapaSimple = true;
+                    colorMuroActual = "#00eaff";
+                } else {
+                    gridElegido = Pacman.MAP;
+                    colorMuroActual = "#355CFF";
                 }
 
                 map    = gridElegido.clone();
@@ -1713,7 +1759,7 @@
 
                 document.getElementById("mensajeGuardado").style.display = "none";
 
-                try {
+                    try {
                     await window.guardarPuntaje(
                         window.datosJugador.nombre,
                         window.datosJugador.sucursal,
@@ -1723,6 +1769,10 @@
                         registroTrivia
                     );
                     document.getElementById("mensajeGuardado").style.display = "block";
+
+                    if (window.codigoFinalista) {
+                        await window.registrarUsoCodigoFinalista(window.codigoFinalista);
+                    }
                 } catch (error) {
                     console.error("No se pudo guardar el puntaje automáticamente:", error);
                 }
@@ -1970,13 +2020,19 @@
                 }
             }
 
-                function obtenerHoraBogota() {
+                function bloquearJuegoPorHorario() {
+                document.getElementById("gameOverModal").style.display = "none";
+                document.getElementById("premioModal").style.display = "none";
+                document.getElementById("pantallaBloqueada").style.display = "flex";
+            }
+
+            function obtenerHoraBogota() {
                 var ahora = new Date();
-                var opciones = { timeZone: "America/Bogota", hour12: false, weekday: "short", hour: "2-digit", minute: "2-digit" };
+                var opciones = { timeZone: "America/Bogota", hour12: false, hour: "2-digit" };
                 var partes = new Intl.DateTimeFormat("en-US", opciones).formatToParts(ahora);
                 var mapa = {};
                 partes.forEach(function (p) { mapa[p.type] = p.value; });
-                return { diaSemana: mapa.weekday, hora: parseInt(mapa.hour, 10), minuto: parseInt(mapa.minute, 10) };
+                return { hora: parseInt(mapa.hour, 10) };
             }
 
                 function esHorarioPermitido() {
@@ -1987,25 +2043,6 @@
                 }
                 var info = obtenerHoraBogota();
                 return info.hora < 12;
-            }
-
-                var info = obtenerHoraBogota();
-
-                if (info.diaSemana === "Sat" || info.diaSemana === "Sun") {
-                    return true;
-                }
-
-                var minutosDelDia = (info.hora * 60) + info.minuto;
-                var enHorarioAlmuerzo = minutosDelDia >= (12 * 60) && minutosDelDia < (14 * 60);
-                var fueraDeJornada = minutosDelDia >= (17 * 60) || minutosDelDia < (7 * 60);
-
-                return enHorarioAlmuerzo || fueraDeJornada;
-            }
-
-            function bloquearJuegoPorHorario() {
-                document.getElementById("gameOverModal").style.display = "none";
-                document.getElementById("premioModal").style.display = "none";
-                document.getElementById("pantallaBloqueada").style.display = "flex";
             }
 
             function avanzarSiguienteNivel() {
@@ -2048,6 +2085,18 @@
             };
             
             var imagenesAmigosJaulaDOM = {};
+
+            function saltarANivel3() {
+                user.reset();
+                level = 3;
+                map.reset(level);
+                user.newLevel();
+                startLevel();
+                actualizarAmigosJaula();
+                document.getElementById("registroModal").style.display = "none";
+                document.getElementById("pantallaClickInicial").style.display = "none";
+                document.getElementById("pantallaInicioSNES").style.display = "none";
+            }
 
             function init(wrapper, root) {
                 var i, len, ghost,
@@ -2129,30 +2178,39 @@
                 document.addEventListener("keydown", keyDown, true);
                 document.addEventListener("keypress", keyPress, true);
 
-                var CODIGO_PRUEBA_HORARIO = "DULAS2026TEST";
-
-                var botonInvisible = document.createElement("div");
-                botonInvisible.style.position = "fixed";
-                botonInvisible.style.top = "0";
-                botonInvisible.style.left = "0";
-                botonInvisible.style.width = "40px";
-                botonInvisible.style.height = "40px";
-                botonInvisible.style.zIndex = "99999";
-                botonInvisible.style.cursor = "default";
-                botonInvisible.addEventListener("click", function () {
-                    var codigoIngresado = window.prompt("Código de acceso:");
-                    if (codigoIngresado === CODIGO_PRUEBA_HORARIO) {
-                        window.modoPruebaSinHorarioGlobal = true;
-                        document.getElementById("pantallaBloqueada").style.display = "none";
-                        document.getElementById("pantallaClickInicial").style.display = "flex";
-                    }
-                });
-                document.body.appendChild(botonInvisible);
-
-                if (!esHorarioPermitido()) {
+                    if (!esHorarioPermitido()) {
                     document.getElementById("pantallaClickInicial").style.display = "none";
                     document.getElementById("pantallaBloqueada").style.display = "flex";
                 }
+
+                document.getElementById("btnSoyFinalista").addEventListener("click", async function () {
+                    var codigoIngresado = window.prompt("Ingresa tu código de finalista:");
+                    if (!codigoIngresado) { return; }
+                    codigoIngresado = codigoIngresado.trim().toUpperCase();
+
+                    try {
+                        var respuesta = await fetch(AZURE_VERIFICAR_CODIGO_FINALISTA_URL + "?codigo=" + encodeURIComponent(codigoIngresado));
+                        var resultado = await respuesta.json();
+
+                        if (!resultado.valido) {
+                            alert("Código inválido o ya sin intentos disponibles.");
+                            return;
+                        }
+
+                        window.finalistaValido = true;
+                        window.codigoFinalista = codigoIngresado;
+
+                        document.getElementById("pantallaBloqueada").style.display = "none";
+                        document.getElementById("pantallaClickInicial").style.display = "flex";
+
+                        document.getElementById("participacionIndividual").parentElement.style.display = "none";
+                        document.getElementById("participacionGrupal").checked = true;
+                        document.getElementById("equipoJugador").style.display = "block";
+
+                    } catch (error) {
+                        alert("No se pudo verificar el código. Intenta de nuevo.");
+                    }
+                });
 
                 forzarMayusculasCampo("premioNombre");
                 forzarMayusculasCampo("premioArea");
@@ -2324,11 +2382,26 @@
                     mostrarFormularioFinal();
                 });
 
-                document.getElementById("jugarDeNuevo").addEventListener("click", function () {
-                    if (!esHorarioPermitido()) {
+                    document.getElementById("jugarDeNuevo").addEventListener("click", async function () {
+                    if (window.codigoFinalista) {
+                        try {
+                            var respuesta = await fetch(AZURE_VERIFICAR_CODIGO_FINALISTA_URL + "?codigo=" + encodeURIComponent(window.codigoFinalista));
+                            var resultado = await respuesta.json();
+                            if (!resultado.valido) {
+                                alert("Ya no tienes intentos disponibles con este código.");
+                                document.getElementById("gameOverModal").style.display = "none";
+                                document.getElementById("pantallaBloqueada").style.display = "flex";
+                                return;
+                            }
+                        } catch (error) {
+                            alert("No se pudo verificar tus intentos restantes.");
+                            return;
+                        }
+                    } else if (!esHorarioPermitido()) {
                         bloquearJuegoPorHorario();
                         return;
                     }
+
                     document.getElementById("gameOverModal").style.display = "none";
                     document.getElementById("mensajeGuardado").style.display = "none";
                     startNewGame();
@@ -2408,8 +2481,18 @@
                     });
                 }
 
-                forzarMayusculas("nombreJugador");
+                                forzarMayusculas("nombreJugador");
                 forzarMayusculas("equipoJugador");
+
+                document.getElementById("btnProbarNivel3").addEventListener("click", function () {
+                    window.datosJugador = window.datosJugador || {
+                        nombre: "PRUEBA",
+                        sucursal: "Sucursal Atlántico",
+                        tipoParticipacion: "Individual",
+                        equipo: ""
+                    };
+                    saltarANivel3();
+                });
 
 
                 timer = window.setInterval(mainLoop, 1000 / Pacman.FPS);
@@ -2449,78 +2532,78 @@
         Pacman.PILL    = 4;
 
         Pacman.MAP = [
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-            [0, 4, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 4, 0],
-            [0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0],
-            [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-            [0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0],
-            [0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0],
-            [0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0],
-            [2, 2, 2, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 2, 2, 2],
-            [0, 0, 0, 0, 1, 0, 1, 0, 0, 3, 0, 0, 1, 0, 1, 0, 0, 0, 0],
-            [2, 2, 2, 2, 1, 1, 1, 0, 3, 3, 3, 0, 1, 1, 1, 2, 2, 2, 2],
-            [0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0],
-            [2, 2, 2, 0, 1, 0, 1, 1, 1, 2, 1, 1, 1, 0, 1, 0, 2, 2, 2],
-            [0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0],
-            [0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-            [0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0],
-            [0, 4, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 4, 0],
-            [0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0],
-            [0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0],
-            [0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0],
-            [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,0 ,0 ,0 ,0 , 0],
+        [0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+        [0, 4, 0, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 4, 0],
+        [0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 1, 0, 1, 0],
+        [0,1,0,1,0,1,0,1,1,1,1,1,0,1,0,1,0,1,0],
+        [0,1,1,1,1,1,0,0,0,1,0,0,0,1,1,1,1,1,0],
+        [2,2,0,0,0,1,1,1,0,1,0,1,1,1,0,0,0,2,2],
+        [0,1,1,1,0,0,0,1,0,1,0,1,0,0,0,1,1,1,0],
+        [0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0],
+        [0,0,0,1,0,0,1,0,0,0,0,0,1,0,0,1,0,0,0],
+        [2,2,2,1,1,1,1,0,3,3,3,0,1,1,1,1,2,2,2],
+        [0,0,0,1,0,0,1,0,0,0,0,0,1,0,0,1,0,0,0],
+        [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+            [0,1,0,0,0,1,0,0,1,0,1,0,0,1,0,0,0,1,0],
+            [0,1,1,1,0,1,1,1,1,0,1,1,1,1,0,1,1,1,0],
+            [0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0],
+            [2,2,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,2,2],
+            [0,4,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,4,0],
+            [0,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,0],
+            [0,1,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,1,0],
+            [0,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
         ];
 
 Pacman.MAP_NIVEL_2_3 = [
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0],
-            [0, 4, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 4, 0],
-            [0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0],
-            [0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0],
-            [0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0],
-            [0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0],
-            [0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0],
-            [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-            [0, 0, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-            [2, 2, 2, 2, 2, 1, 0, 3, 3, 3, 3, 3, 0, 1, 2, 2, 2, 2, 2],
-            [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-            [0, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 0],
-            [0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0],
-            [0, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0],
-            [0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0],
-            [0, 1, 0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 0],
-            [0, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0],
-            [0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0],
-            [0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0],
-            [0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,1,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,0],
+            [0,4,0,0,1,0,1,0,0,0,0,0,1,0,1,0,0,4,0],
+            [0,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,0],
+            [0,0,1,0,0,0,1,0,1,0,1,0,1,0,0,0,1,0,0],
+            [0,1,1,1,1,1,1,0,1,1,1,0,1,1,1,1,1,1,0],
+            [2,2,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,2,2],
+            [0,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,0],
+            [0,0,0,1,0,0,1,0,1,1,1,0,1,0,0,1,0,0,0],
+            [0,0,0,1,1,1,1,0,0,0,0,0,1,1,1,1,0,0,0],
+            [2,2,2,1,0,0,1,0,3,3,3,0,1,0,0,1,2,2,2],
+            [0,0,0,1,1,1,1,0,0,0,0,0,1,1,1,1,0,0,0],
+            [0,1,1,1,0,0,1,1,1,1,1,1,1,0,0,1,1,1,0],
+            [0,1,0,1,1,1,0,0,1,0,1,0,0,1,1,1,0,1,0],
+            [0,1,0,0,0,1,1,1,1,0,1,1,1,1,0,0,0,1,0],
+            [0,1,1,1,0,0,0,1,0,0,0,1,0,0,0,1,1,1,0],
+            [2,2,0,1,1,1,0,1,1,1,1,1,0,1,1,1,0,2,2],
+            [0,4,1,1,0,1,0,0,0,1,0,0,0,1,0,1,1,4,0],
+            [0,1,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,1,0],
+            [0,1,1,1,1,0,1,0,0,0,0,0,1,0,1,1,1,1,0],
+            [0,1,0,0,1,1,1,1,1,0,1,1,1,1,1,0,0,1,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
         ];
 
        Pacman.MAP_NIVEL_4_5 = [
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-            [0, 4, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 4, 0],
-            [0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0],
-            [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-            [0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0],
-            [0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0],
-            [0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0],
-            [2, 2, 2, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 2, 2, 2],
-            [0, 0, 0, 0, 1, 0, 1, 0, 0, 3, 0, 0, 1, 0, 1, 0, 0, 0, 0],
-            [2, 2, 2, 2, 1, 1, 1, 0, 3, 3, 3, 0, 1, 1, 1, 2, 2, 2, 2],
-            [0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0],
-            [2, 2, 2, 0, 1, 0, 1, 1, 1, 2, 1, 1, 1, 0, 1, 0, 2, 2, 2],
-            [0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0],
-            [0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-            [0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0],
-            [0, 4, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 4, 0],
-            [0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0],
-            [0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0],
-            [0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0],
-            [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,1,1,1,0,1,1,1,1,0,1,1,1,1,0,1,1,1,0],
+            [0,4,0,1,1,1,0,1,1,1,1,1,0,1,1,1,0,4,0],
+            [0,1,1,1,0,1,1,1,0,1,0,1,1,1,0,1,1,1,0],
+            [0,1,0,1,1,1,0,1,1,1,1,1,0,1,1,1,0,1,0],
+            [0,1,1,1,0,1,1,1,0,1,0,1,1,1,0,1,1,1,0],
+            [2,2,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,2,2],
+            [0,1,0,1,0,1,1,1,0,1,0,1,1,1,0,1,0,1,0],
+            [0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0],
+            [0,1,0,1,0,1,1,0,0,0,0,0,1,1,0,1,0,1,0],
+            [2,2,1,4,1,1,1,0,3,3,3,0,1,1,1,4,1,2,2],
+            [0,1,0,1,0,1,1,0,0,0,0,0,1,1,0,1,0,1,0],
+            [0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0],
+            [0,1,0,1,0,1,1,1,0,1,0,1,1,1,0,1,0,1,0],
+            [0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0],
+            [0,1,0,1,0,1,1,1,0,1,0,1,1,1,0,1,0,1,0],
+            [2,2,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,2,2],
+            [0,1,0,1,0,1,1,1,0,1,0,1,1,1,0,1,0,1,0],
+            [0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0],
+            [0,4,0,1,0,1,1,1,0,1,0,1,1,1,0,1,0,4,0],
+            [0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
         ];
 
         Pacman.WALLS_NIVEL_2_3 = [
