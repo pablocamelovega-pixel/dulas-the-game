@@ -133,3 +133,18 @@ window.guardarEstadisticasTrivia = async function(trivia) {
         console.error("No se pudieron guardar las estadísticas de trivia:", error);
     }
 };
+
+const AZURE_VERIFICAR_CODIGO_FINALISTA_URL = "https://dulas-the-game-api-comercial-agf4hca0hwabgzg6.centralus-01.azurewebsites.net/api/verificarCodigoFinalista";
+const AZURE_REGISTRAR_USO_CODIGO_URL = "https://dulas-the-game-api-comercial-agf4hca0hwabgzg6.centralus-01.azurewebsites.net/api/registrarUsoCodigo";
+
+window.registrarUsoCodigoFinalista = async function(codigo) {
+    try {
+        await fetch(AZURE_REGISTRAR_USO_CODIGO_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ codigo: codigo })
+        });
+    } catch (error) {
+        console.error("No se pudo registrar el uso del código:", error);
+    }
+};
