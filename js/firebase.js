@@ -1,13 +1,13 @@
 // URL de tu Función de Azure
 const AZURE_FUNCTION_URL = "https://dulas-the-game-api-comercial-agf4hca0hwabgzg6.centralus-01.azurewebsites.net/api/guardarPuntaje";
 
-window.guardarPuntaje = async function(nombre, sucursal, tipoParticipacion, equipo, puntaje, trivia) {
+window.guardarPuntaje = async function(nombre, sucursal, tipoParticipacion, equipo, puntaje, trivia, codigoFinalista) {
     console.log("Enviando datos a Azure...");
     try {
         const respuesta = await fetch(AZURE_FUNCTION_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ nombre, sucursal, tipoParticipacion, equipo, puntaje, trivia })
+            body: JSON.stringify({ nombre, sucursal, tipoParticipacion, equipo, puntaje, trivia, codigoFinalista })
         });
 
         if (!respuesta.ok) {
