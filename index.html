@@ -1761,14 +1761,15 @@
 
                 document.getElementById("mensajeGuardado").style.display = "none";
 
-                    try {
+                try {
                     await window.guardarPuntaje(
                         window.datosJugador.nombre,
                         window.datosJugador.sucursal,
                         window.datosJugador.tipoParticipacion,
                         window.datosJugador.equipo,
                         puntajeFinal,
-                        registroTrivia
+                        registroTrivia,
+                        window.codigoFinalista || null
                     );
                     document.getElementById("mensajeGuardado").style.display = "block";
 
