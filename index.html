@@ -2038,12 +2038,8 @@
                 return { hora: parseInt(mapa.hour, 10) };
             }
 
-                function esHorarioPermitido() {
-                if (window.finalistaValido === true) {
-                    return true;
-                }
-                var info = obtenerHoraBogota();
-                return info.hora < 12;
+            function esHorarioPermitido() {
+                return true;
             }
 
             function avanzarSiguienteNivel() {
